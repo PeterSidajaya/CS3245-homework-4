@@ -1,0 +1,5 @@
+### REGEX ###
+
+AND_REGEX = "AND"
+PHRASAL_REGEX = "\"(*)\""
+WHITESPACE_REGEX = "\s+"
