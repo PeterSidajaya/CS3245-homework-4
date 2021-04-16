@@ -12,7 +12,7 @@ def GetList(word):
 	Retrieval Stub - Getting the lsit of position lists for a word.
 
 	These should be in the format 
-		[[docId1, termFreq1, posList1], [docId2, termFreq2, posLsit2]...]
+		[[docId1, termFreq1, posList1], [docId2, termFreq2, posList2], ...]
 	"""
 	return []
 
