@@ -128,21 +128,22 @@ def three_word_phrasal_query(word1, word2, word3):
 	result = []
 	while idx1 < len(listOfTriples1) and idx2 < len(listOfTriples2) and idx3 < len(listOfTriples3):
 		# The DOC_ID is the same at our two list pointers
-		if listOfTriples1[idx1][DOC_ID] == listOfTriples[idx2][DOC_ID] and \
-			listOfTriples1[idx1][DOC_ID] == listOfTriples[idx3][DOC_ID]:
+		if listOfTriples1[idx1][DOC_ID] == listOfTriples2[idx2][DOC_ID] and\
+			listOfTriples1[idx1][DOC_ID] == listOfTriples3[idx3][DOC_ID]:
 			# If the document contains the phrase, add it to the result
-			if two_list_phrasal_query(listOfTriples1[idx1][POS_LIST],
-								   listOfTriples2[idx2][POS_LIST]):
+			if three_list_phrasal_query(listOfTriples1[idx1][POS_LIST],
+								   listOfTriples2[idx2][POS_LIST],
+								   listOfTriples3[idx3][POS_LIST]):
 				result.append(listOfTriples1[idx1][DOC_ID])
 			idx1 += 1
 			idx2 += 1
 			idx3 += 1
 		# The DOC_ID's are different - increment the least one
-		elif listOfTriples1[idx1][DOC_ID] < listOfTriples2[idx2][DOC_ID] and\
-			listOfTriples1[idx1][DOC_ID] < listOfTriples2[idx2][DOC_ID]:
+		elif listOfTriples1[idx1][DOC_ID] <= listOfTriples2[idx2][DOC_ID] and\
+			listOfTriples1[idx1][DOC_ID] <= listOfTriples3[idx3][DOC_ID]:
 			idx1 += 1
-		elif listOfTriples2[idx2][DOC_ID] < listOfTriples1[idx1][DOC_ID] and\
-			listOfTriples2[idx2][DOC_ID] < listOfTriples3[idx3][DOC_ID]:
+		elif listOfTriples2[idx2][DOC_ID] <= listOfTriples1[idx1][DOC_ID] and\
+			listOfTriples2[idx2][DOC_ID] <= listOfTriples3[idx3][DOC_ID]:
 			idx2 += 1
 		else:
 			idx3 += 1
