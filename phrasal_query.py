@@ -18,7 +18,7 @@ def get_word_list(word):
 	return []
 
 
-def phrasal_query(query_string):
+def get_phrasal_query_doc_id(query_string):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	

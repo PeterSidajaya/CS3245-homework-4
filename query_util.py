@@ -7,6 +7,7 @@ class QueryType(Enum):
     FREE_TEXT = 0
     PHRASAL = 1
 
+
 def categorise_query(query: str):
     """
     Output a list of clauses, where each element is a tuple
@@ -18,19 +19,21 @@ def categorise_query(query: str):
          Output: [<little puppy, QueryType.PHRASAL>, <chihuahua, QueryType.FREE_TEXT>]
     """
     # Try to split by boolean op
-    exp_split = re.split(AND_REGEX, query)
+    exp_split = query.split("AND")
 
     # Check for each clause its type and append it
     query_clauses = []
     for exp in exp_split:
         phrasal_search = re.search(PHRASAL_REGEX, exp)
         if (phrasal_search == None):
-            query_clauses.append((exp, QueryType.FREE_TEXT))
+            query_clauses.append((exp.strip(), QueryType.FREE_TEXT))
         else:
-            query_clauses.append((phrasal_search.group(1), QueryType.PHRASAL))
+            query_clauses.append((phrasal_search.group(1).strip(), QueryType.PHRASAL))
     
     return query_clauses
 
+
+# TODO: What is this?
 def stem_clause(clause: (str, QueryType), stemmer):
     """
     """

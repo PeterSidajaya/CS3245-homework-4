@@ -8,20 +8,21 @@ def index_text(token_list):
         token_list (list): list of tokens
 
     Returns:
-        dict: dictionary of term, (frequency, position list) pairs
+        freq_pos_dict: dictionary of term, (frequency, position list) pairs
     """
-    dict = {}
+    freq_pos_dict = {}
     index = 0
     for term in token_list:
-        if term not in dict:
-            dict[term] = (1, [index,])
+        if term not in freq_pos_dict:
+            freq_pos_dict[term] = (1, [index,])
         else:
-            count, position_list = dict[term]
+            count, position_list = freq_pos_dict[term]
             count += 1
             position_list.append(index)
-            dict[term] = (count, position_list)
+            freq_pos_dict[term] = (count, position_list)
         index += 1
-    return dict
+    return freq_pos_dict
+
 
 def get_list(term, dictionary, posting_file):
     """

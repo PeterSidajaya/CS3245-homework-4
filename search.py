@@ -5,7 +5,8 @@ import nltk
 import sys
 import getopt
 import pickle
-from query import search
+from query import process_query
+
 
 def usage():
     print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
@@ -30,7 +31,7 @@ def run_search(dict_file, postings_file, queries_file, results_file):
         if (not query):
             out_file.write("")
         else:
-            out_file.write(search(query, new_dict, postings_file))
+            out_file.write(process_query(query, new_dict, postings_file))
         
         if query_list:
             out_file.write('\n')
