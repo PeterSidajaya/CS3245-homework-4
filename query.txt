@@ -1,1 +1,1 @@
-xerox
+"xerox photocopy" AND subject AND "mislaid"

@@ -24,7 +24,7 @@ def index_text(token_list):
     return freq_pos_dict
 
 
-def get_list(term, dictionary, posting_file):
+def get_word_list(term, dictionary, posting_file):
     """
     Returns you the posting list
 

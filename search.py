@@ -24,6 +24,7 @@ def run_search(dict_file, postings_file, queries_file, results_file):
 
     in_file = open(queries_file, 'r', encoding="utf8")
     out_file = open(results_file, 'w', encoding="utf8")
+    posting_file = open(postings_file, 'rb')
     query_list = in_file.read().splitlines()
 
     while query_list:
@@ -31,7 +32,7 @@ def run_search(dict_file, postings_file, queries_file, results_file):
         if (not query):
             out_file.write("")
         else:
-            out_file.write(process_query(query, new_dict, postings_file))
+            out_file.write(process_query(query, new_dict, posting_file))
         
         if query_list:
             out_file.write('\n')

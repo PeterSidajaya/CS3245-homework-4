@@ -1,3 +1,4 @@
+from index_helper import get_word_list
 import nltk
 
 def stem_word(word):
@@ -8,17 +9,7 @@ def stem_word(word):
 	return stemmer.stem(word.lower())
 
 
-def get_word_list(word):
-	"""
-	Retrieval Stub - Getting the lsit of position lists for a word.
-
-	These should be in the format 
-		[[docId1, termFreq1, posList1], [docId2, termFreq2, posList2], ...]
-	"""
-	return []
-
-
-def get_phrasal_query_doc_id(query_string):
+def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	
@@ -34,16 +25,23 @@ def get_phrasal_query_doc_id(query_string):
 	words = list(map(lambda word: stem_word(word), words))
 
 	if len(words) == 2:
+		word_list_1 = get_word_list(words[0], dictionary, posting_file)
+		word_list_2 = get_word_list(words[1], dictionary, posting_file)
+		
 		print("Two words: {}, {}".format(words[0], words[1]))
-		return two_word_phrasal_query(words[0], words[1])
+		return two_word_phrasal_query(word_list_1, word_list_2)
 	elif len(words) == 3:
+		word_list_1 = get_word_list(words[0], dictionary, posting_file)
+		word_list_2 = get_word_list(words[1], dictionary, posting_file)
+		word_list_3 = get_word_list(words[2], dictionary, posting_file)
+
 		print("Three words: {}, {}, {}".format(words[0], words[1], words[2]))
-		return three_word_phrasal_query(words[0], words[1], words[2])
+		return three_word_phrasal_query(word_list_1, word_list_2, word_list_3)
 	else:
 		return []
 
 
-def two_word_phrasal_query(word1, word2):
+def two_word_phrasal_query(word_list_1, word_list_2):
 	"""
 	Given two words, return the docId's which result from the phrasal query.
 
@@ -54,9 +52,6 @@ def two_word_phrasal_query(word1, word2):
 		list[docId] A list of integers representing the doc Ids containing a phrase
 	"""
 	DOC_ID, TF, POS_LIST = 0, 1, 2
-
-	word_list_1 = get_word_list(word1)
-	word_list_2 = get_word_list(word2)
 
 	idx1, idx2 = 0, 0
 	result = []
@@ -113,7 +108,7 @@ def two_list_phrasal_query(list1, list2, complete=False):
 	return result if complete else False
 
 
-def three_word_phrasal_query(word1, word2, word3):
+def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
 	"""
 	Given two words, return the docId's which result from the phrasal query.
 
