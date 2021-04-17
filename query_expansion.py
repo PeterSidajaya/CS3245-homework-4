@@ -1,10 +1,12 @@
 from enum import Enum
 from nltk import pos_tag, word_tokenize
 from nltk.corpus import wordnet
-from nltk.stem import WordNetLemmatizer
 
 from query_util import QueryType
 from constants import *
+
+# TODO: Move to search.py / query.py
+from nltk.stem import WordNetLemmatizer
 
 # TODO: Move to index.py
 import nltk
@@ -21,6 +23,8 @@ def expand_clause(clause: (str, QueryType), lemmatzr):
     """
     Apply expansion technique to the given clause.
     The clause will be stemmed by the given lemmatizer.
+
+    Note: Prefer to use WordNetLemmatizer as lemmatizer.
     """
     # We dont expand phrasal clause
     if (clause[1] == QueryType.PHRASAL):
@@ -39,7 +43,7 @@ def expand_clause(clause: (str, QueryType), lemmatzr):
         expanded_token = ' '.join(map(lambda x: x.lemma_names()[0], synonyms))
         expanded_tokens.append(expanded_token)
     
-    return ' '.join(expanded_tokens)
+    return (' '.join(expanded_tokens), clause[1])
 
 ############ HELPERS ############
 
