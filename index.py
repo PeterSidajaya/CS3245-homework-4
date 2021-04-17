@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from index_helper import index_text
+from constants import *
 
 import re
 import nltk
@@ -22,11 +23,13 @@ def build_index(doc_id, out_dict, out_postings):
     then output the dictionary file and postings file
     """
     stemmer = nltk.stem.PorterStemmer()
-    sample_limit = 30                      # this is the limit of the entry we are taking
+    # For testing - this is the limit of the entry we are taking
+    sample_limit = 30                               
     dictionary = {}
-    dictionary['LENGTH'] = {}               # this is where we'll store the length of each docs
+    # This is where we'll store the length of each docs
+    dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
 
-    # this part opens the csv
+    # Opens the csv
     csv.field_size_limit(sys.maxsize)
     with open(doc_id, newline='') as f:
         reader = csv.reader(f)
@@ -39,11 +42,7 @@ def build_index(doc_id, out_dict, out_postings):
             if i == sample_limit + 2:
                 break
 
-            doc_id = row[0]
-            title = row[1]
-            content = row[2]
-            date_posted = row[3]
-            court = row[4]
+            doc_id, title, content, date_posted, court = row
 
             word_list = nltk.tokenize.word_tokenize(content)
             filtered_list = [text for text in word_list if text not in string.punctuation]
@@ -52,39 +51,42 @@ def build_index(doc_id, out_dict, out_postings):
             content_dict = index_text(token_list)
             length = 0
 
-            # calculate and precompute df and length
+            # Calculate and precompute df and length
             for term, tup in content_dict.items():
                 tf, position_list = tup
                 if term not in dictionary:
-                    dictionary[term] = (1, [(int(doc_id), tf, position_list),])      # first entry is df
+                    # First entry is df
+                    dictionary[term] = (1, [(int(doc_id), tf, position_list),])      
                 else:
                     df = dictionary[term][0] + 1
                     posting_list = dictionary[term][1] + [(int(doc_id), tf, position_list),]
                     dictionary[term] = (df, posting_list)
-                length += (1 + math.log(tf, 10)) ** 2       # document length is calculated from tf
+                # Document length is calculated from tf
+                length += (1 + math.log(tf, 10)) ** 2       
             
-            # calculate document length for document normalization in search
-            dictionary['LENGTH'][int(doc_id)] = math.sqrt(length)
+            # Calculate document length for document normalization in search
+            dictionary[DOCUMENT_LENGTH_KEYWORD][int(doc_id)] = math.sqrt(length)
 
-    # this part here deals with pickles
+    # Deals with pickles
     posting_file = open(out_postings, 'wb')
     dictionary_file = open(out_dict, 'wb')
-    posting_file.truncate(0)                    # delete existing contents
+    
+    # Delete existing contents
+    posting_file.truncate(0)                    
     dictionary_file.truncate(0)
 
-    # store posting_lists and dictionary to files
+    # Store posting_lists and dictionary to files
     for term, value in dictionary.items():
-        if term == 'LENGTH':                    # LENGTH is not a term
+        if term == DOCUMENT_LENGTH_KEYWORD:     # LENGTH is not a term
             continue
         df, posting_list = value
         pointer = posting_file.tell()           # find our current position in the posting file
         pickle.dump(posting_list, posting_file) # dump the posting list into the posting file
         dictionary[term] = (df, pointer)        # keep track of the pointer
         
-    pickle.dump(dictionary, dictionary_file)    # dumpt the dictionary into the dictionary file
+    pickle.dump(dictionary, dictionary_file)    # dump the dictionary into the dictionary file
     posting_file.close()
     dictionary_file.close()
-
 
 input_directory = output_file_dictionary = output_file_postings = None
 
