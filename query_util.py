@@ -15,7 +15,7 @@ def categorise_query(query: str):
     Multiple clause implies that each clause is connected via AND operator.
 
     e.g. Input: "little puppy" AND chihuahua 
-         Output: [<little puppy, QueryType.PHRASAL>, <chihuahua, QueryType.PHRASAL>]
+         Output: [<little puppy, QueryType.PHRASAL>, <chihuahua, QueryType.FREE_TEXT>]
     """
     # Try to split by boolean op
     exp_split = re.split(AND_REGEX, query)
