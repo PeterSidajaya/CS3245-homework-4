@@ -3,14 +3,24 @@ import nltk
 import pickle
 import math
 
+# this function will be used to run if there is phrasal query
+def intersect_document_ids(doc_list):
+    # sort by lower domain first
+    if (len(doc_list) == 1):
+        return doc_list[0]
 
-def search(query, dictionary, postings_file):
+    doc_list.sort(key=len)
+    return set(doc_list[0]).intersection(*doc_list[1:])
+
+
+def search(query_list, dictionary, postings_file, possible_doc_list):
     """rank the list of document based on the query given
 
     Args:
-        query (str): the query string to be ranked against
+        query_list (list): the list of query string to be ranked against
         dictionary (dictionary): dictionary of the posting lists
         postings_file (str): address to the posting file list
+        possible_doc_list (list): list of valid doc_id from phrasal queries in the given query text
 
     Returns:
         str: search rank result
@@ -19,7 +29,7 @@ def search(query, dictionary, postings_file):
 
     # all tokenization should consistent with the one from index.py
     stemmer = nltk.stem.PorterStemmer()
-    token_list = list(map(lambda x: stemmer.stem(x).lower(), query.split(" ")))
+    token_list = list(map(lambda x: stemmer.stem(x).lower(), query_list))
     query_counter = Counter(token_list)
     query_keys = list(query_counter.keys())
 
@@ -105,25 +115,12 @@ def search(query, dictionary, postings_file):
         # final cosine score for ranking
         score = sum(score)
 
-        # maintain the top k results and store it in ranking_list
-        k = 10
+        ranking_list.append((score, doc_id))
+        ranking_list.sort(key=lambda x: x[0], reverse=True)
 
-        if (not ranking_list):
-            ranking_list.append((score, doc_id))
-        else:
-            if (score > ranking_list[-1][0]):
-                for x in range(len(ranking_list)):
-                    if (ranking_list[x][0] < score):
-                        ranking_list.insert(x, (score, doc_id))
-                        break
-                
-                if (len(ranking_list) > k):
-                    ranking_list = ranking_list[:k]
-            else:
-                if (len(ranking_list) < k):
-                    ranking_list.append((score, doc_id))
-
-    return " ".join([str(y) for x, y in ranking_list])
+    tf_idf_doc_list = [y for x, y in ranking_list]
+    final_doc_list = set(tf_idf_doc_list) - possible_doc_list
+    return " ".join(str(doc_id) for doc_id in list(final_doc_list))
 
 
 def normalize_list(lst, denominator):

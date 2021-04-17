@@ -1,35 +1,37 @@
 import nltk
 
-def Stem(word):
+def stem_word(word):
 	"""
 	Stemming stub - should perform case folding then stemming.
 	"""
 	stemmer = nltk.PorterStemmer()
 	return stemmer.stem(word.lower())
 
-def GetList(word):
+
+def get_word_list(word):
 	"""
 	Retrieval Stub - Getting the lsit of position lists for a word.
 
 	These should be in the format 
-		[[docId1, termFreq1, posList1], [docId2, termFreq2, posLsit2]...]
+		[[docId1, termFreq1, posList1], [docId2, termFreq2, posList2], ...]
 	"""
 	return []
 
-def phrasal_query(queryString):
+
+def phrasal_query(query_string):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	
 	Format of the query string will be "a b" or "a b c".
 
 	Arguments:
-		queryString 	The query.
+		query_string 	The query.
 	Returns:
 		list[docId] 	A list of integers representing the doc Ids.
 	"""
-	print("Query: \"{}\" - ".format(queryString), end="")
-	words = queryString.split()
-	words = list(map(lambda word: Stem(word), words))
+	print("Query: \"{}\" - ".format(query_string), end="")
+	words = query_string.split()
+	words = list(map(lambda word: stem_word(word), words))
 
 	if len(words) == 2:
 		print("Two words: {}, {}".format(words[0], words[1]))
@@ -39,6 +41,7 @@ def phrasal_query(queryString):
 		return three_word_phrasal_query(words[0], words[1], words[2])
 	else:
 		return []
+
 
 def two_word_phrasal_query(word1, word2):
 	"""
@@ -52,27 +55,28 @@ def two_word_phrasal_query(word1, word2):
 	"""
 	DOC_ID, TF, POS_LIST = 0, 1, 2
 
-	listOfTriples1 = GetList(word1)
-	listOfTriples2 = GetList(word2)
+	word_list_1 = get_word_list(word1)
+	word_list_2 = get_word_list(word2)
 
 	idx1, idx2 = 0, 0
 	result = []
-	while idx1 < len(listOfTriples1) and idx2 < len(listOfTriples2):
+	while idx1 < len(word_list_1) and idx2 < len(word_list_2):
 		# The DOC_ID is the same at our two list pointers
-		if listOfTriples1[idx1][DOC_ID] == listOfTriples[idx2][DOC_ID]:
+		if word_list_1[idx1][DOC_ID] == word_list_2[idx2][DOC_ID]:
 			# If the document contains the phrase, add it to the result
-			if two_list_phrasal_query(listOfTriples1[idx1][POS_LIST],
-								   listOfTriples2[idx2][POS_LIST]):
-				result.append(listOfTriples1[idx1][DOC_ID])
+			if two_list_phrasal_query(word_list_1[idx1][POS_LIST],
+								   word_list_2[idx2][POS_LIST]):
+				result.append(word_list_1[idx1][DOC_ID])
 			idx1 += 1
 			idx2 += 1
 		# The DOC_ID's are different - increment the lesser one
-		elif listOfTriples1[idx1][DOC_ID] < listOfTriples[idx2][DOC_ID]:
+		elif word_list_1[idx1][DOC_ID] < word_list_2[idx2][DOC_ID]:
 			idx1 += 1
 		else:
 			idx2 += 1
 
 	return result
+
 
 def two_list_phrasal_query(list1, list2, complete=False):
 	"""
@@ -108,6 +112,7 @@ def two_list_phrasal_query(list1, list2, complete=False):
 
 	return result if complete else False
 
+
 def three_word_phrasal_query(word1, word2, word3):
 	"""
 	Given two words, return the docId's which result from the phrasal query.
@@ -120,35 +125,36 @@ def three_word_phrasal_query(word1, word2, word3):
 	"""
 	DOC_ID, TF, POS_LIST = 0, 1, 2
 
-	listOfTriples1 = GetList(word1)
-	listOfTriples2 = GetList(word2)
-	listOfTriples3 = GetList(word3)
+	word_list_1 = get_word_list(word1)
+	word_list_2 = get_word_list(word2)
+	word_list_3 = get_word_list(word3)
 
 	idx1, idx2, idx3 = 0, 0, 0
 	result = []
-	while idx1 < len(listOfTriples1) and idx2 < len(listOfTriples2) and idx3 < len(listOfTriples3):
+	while idx1 < len(word_list_1) and idx2 < len(word_list_2) and idx3 < len(word_list_3):
 		# The DOC_ID is the same at our two list pointers
-		if listOfTriples1[idx1][DOC_ID] == listOfTriples2[idx2][DOC_ID] and\
-			listOfTriples1[idx1][DOC_ID] == listOfTriples3[idx3][DOC_ID]:
+		if word_list_1[idx1][DOC_ID] == word_list_2[idx2][DOC_ID] and\
+			word_list_1[idx1][DOC_ID] == word_list_3[idx3][DOC_ID]:
 			# If the document contains the phrase, add it to the result
-			if three_list_phrasal_query(listOfTriples1[idx1][POS_LIST],
-								   listOfTriples2[idx2][POS_LIST],
-								   listOfTriples3[idx3][POS_LIST]):
-				result.append(listOfTriples1[idx1][DOC_ID])
+			if three_list_phrasal_query(word_list_1[idx1][POS_LIST],
+								   word_list_2[idx2][POS_LIST],
+								   word_list_3[idx3][POS_LIST]):
+				result.append(word_list_1[idx1][DOC_ID])
 			idx1 += 1
 			idx2 += 1
 			idx3 += 1
 		# The DOC_ID's are different - increment the least one
-		elif listOfTriples1[idx1][DOC_ID] <= listOfTriples2[idx2][DOC_ID] and\
-			listOfTriples1[idx1][DOC_ID] <= listOfTriples3[idx3][DOC_ID]:
+		elif word_list_1[idx1][DOC_ID] <= word_list_2[idx2][DOC_ID] and\
+			word_list_1[idx1][DOC_ID] <= word_list_3[idx3][DOC_ID]:
 			idx1 += 1
-		elif listOfTriples2[idx2][DOC_ID] <= listOfTriples1[idx1][DOC_ID] and\
-			listOfTriples2[idx2][DOC_ID] <= listOfTriples3[idx3][DOC_ID]:
+		elif word_list_2[idx2][DOC_ID] <= word_list_1[idx1][DOC_ID] and\
+			word_list_2[idx2][DOC_ID] <= word_list_3[idx3][DOC_ID]:
 			idx2 += 1
 		else:
 			idx3 += 1
 
 	return result
+
 
 def three_list_phrasal_query(list1, list2, list3, complete=False):
 	"""
@@ -175,6 +181,7 @@ def three_list_phrasal_query(list1, list2, list3, complete=False):
 		if list1[idx1] + 1 == list2[idx2] and list1[idx1] + 2 == list3[idx3]:
 			if not complete:
 				return True
+
 			result.append(list1[idx1])
 			idx1 += 1
 			idx2 += 1
