@@ -37,6 +37,10 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 
 		print("Three words: {}, {}, {}".format(words[0], words[1], words[2]))
 		return three_word_phrasal_query(word_list_1, word_list_2, word_list_3)
+	# Just handling an edge case
+	elif len(words) == 1:
+		return get_word_list(words[0], dictionary, posting_file)
+	# The phrasal query with more than 3 words is illegal
 	else:
 		return []
 
