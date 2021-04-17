@@ -57,7 +57,7 @@ def one_word_phrasal_query(word_list_1):
 	Returns:
 		list[docId] 	A list of integers representing the doc Ids containing the phrase
 	"""
-	return list(map(lambda triplet: triplet[DOC_ID], get_word_list(words[0], dictionary, posting_file)))
+	return list(map(lambda triplet: triplet[DOC_ID], word_list_1))
 
 def two_word_phrasal_query(word_list_1, word_list_2):
 	"""
