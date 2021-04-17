@@ -1,5 +1,6 @@
-from enum import Enum
 from constants import *
+from enum import Enum
+from nltk import word_tokenize
 
 import re
 
@@ -16,6 +17,8 @@ def categorise_query(query: str):
 
     e.g. Input: "little puppy" AND chihuahua 
          Output: [<little puppy, QueryType.PHRASAL>, <chihuahua, QueryType.FREE_TEXT>]
+    e.g. Input: little puppy chihuahua 
+         Output: [<little puppy chihuahua, QueryType.FREE_TEXT>]
     """
     # Try to split by boolean op
     exp_split = re.split(AND_REGEX, query)
@@ -30,6 +33,9 @@ def categorise_query(query: str):
             query_clauses.append((phrasal_search.group(1), QueryType.PHRASAL))
     
     return query_clauses
+
+def convert_clause_to_tokens(clause: (str, QueryType)):
+    return word_tokenize(clause[0])
 
 def stem_clause(clause: (str, QueryType), stemmer):
     """

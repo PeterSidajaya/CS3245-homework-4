@@ -1,4 +1,9 @@
+from nltk.stem import WordNetLemmatizer
+
 from collections import Counter
+from query_util import *
+from query_expansion import expand_clause
+
 import nltk
 import pickle
 import math
@@ -12,15 +17,58 @@ def intersect_document_ids(doc_list):
     doc_list.sort(key=len)
     return set(doc_list[0]).intersection(*doc_list[1:])
 
+def process_query(query_string, dictionary, postings_file):
+    # stemmer = nltk.stem.PorterStemmer()
+    # lemmatzr = WordNetLemmatizer()
+    
+    # Categorise query
+    query_clauses = categorise_query(query_string)
 
-def search(query_list, dictionary, postings_file, possible_doc_list):
-    """rank the list of document based on the query given
+    phrasal_results = []
+
+    # We only do search on phrasal queries first
+    is_there_phrasal_query = False
+    for query_clause in query_clauses:
+        if query_clause[1] == QueryType.PHRASAL:
+            phrasal_query_docs = phrasal_query(query_clause[0])
+            phrasal_results.append(phrasal_query_docs)
+            is_there_phrasal_query = True
+
+    # Combine phrasal results
+    final_phrasal_result = intersect_document_ids(phrasal_results)
+    
+    tokenised_query_clauses = list(map(lambda x: convert_clause_to_tokens(x), query_clauses))
+    tokenised_query_clauses = [item for sublist in t for item in tokenised_query_clauses]
+    
+    # From the list of phrasal results, we do free text search
+    final_result = []
+    if is_there_phrasal_query:
+        final_result = free_text_search(tokenised_query_clauses, dictionary, postings_file, final_phrasal_result)
+    else:
+        final_result = free_text_search(tokenised_query_clauses, dictionary, postings_file, None)
+
+    # TODO: Possibly do PRF with the result here
+
+    return final_result
+
+# '"a b" AND c d e'
+# Splitting: [<'a b', PHRASAL>, <'c d e', FREE_TEXT>]
+#             ---- LOUIS ----   ---- HW3 search ----
+# ['a', 'b', 'c', 'd', 'e']
+# Results:   [[results for 'a b'], [results for 'c d e']]
+
+# Merging of result using AND operator: [[combined result for '"a b" AND c d e']]
+
+# Ranking of documents [[Ranked result of combined result for '"a b" AND c d e']] <- Victors method
+
+def free_text_search(query_list, dictionary, postings_file, possible_doc_set=None):
+    """Rank the list of document based on the query given.
 
     Args:
         query_list (list): the list of query string to be ranked against
         dictionary (dictionary): dictionary of the posting lists
         postings_file (str): address to the posting file list
-        possible_doc_list (list): list of valid doc_id from phrasal queries in the given query text
+        possible_doc_set (set): set of valid doc_id from phrasal queries in the given query text
 
     Returns:
         str: search rank result
@@ -119,7 +167,12 @@ def search(query_list, dictionary, postings_file, possible_doc_list):
         ranking_list.sort(key=lambda x: x[0], reverse=True)
 
     tf_idf_doc_list = [y for x, y in ranking_list]
-    final_doc_list = set(tf_idf_doc_list) - possible_doc_list
+    
+    if (possible_doc_set == None):
+        final_doc_list = set(tf_idf_doc_list)
+    else:
+        final_doc_list = set(tf_idf_doc_list).intersection(possible_doc_set)
+
     return " ".join(str(doc_id) for doc_id in list(final_doc_list))
 
 
