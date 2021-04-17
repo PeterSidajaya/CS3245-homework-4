@@ -24,8 +24,6 @@ def build_index(doc_id, out_dict, out_postings):
     """
     stemmer = nltk.stem.PorterStemmer()
 
-    # For testing - this is the limit of the entry we are taking
-    sample_limit = 5                               
     dictionary = {}
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
@@ -43,14 +41,11 @@ def build_index(doc_id, out_dict, out_postings):
     # Opens the csv
     with open(doc_id, newline='', encoding='UTF-8') as f:
         reader = csv.reader(f)
-        i = 0
 
-        for row in reader:
-            i += 1
-            if i == 1:                  # skip first row
+        for idx, row in enumerate(reader):
+            # Skip first row
+            if idx == 0:                  
                 continue
-            if i == sample_limit + 2:
-                break
 
             doc_id, title, content, date_posted, court = row
 
