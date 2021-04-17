@@ -120,10 +120,6 @@ def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
 	"""
 	DOC_ID, TF, POS_LIST = 0, 1, 2
 
-	word_list_1 = get_word_list(word1)
-	word_list_2 = get_word_list(word2)
-	word_list_3 = get_word_list(word3)
-
 	idx1, idx2, idx3 = 0, 0, 0
 	result = []
 	while idx1 < len(word_list_1) and idx2 < len(word_list_2) and idx3 < len(word_list_3):

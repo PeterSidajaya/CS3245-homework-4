@@ -145,8 +145,6 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id):
         ranking_list.append((score, doc_id))
         ranking_list.sort(key=lambda x: x[0], reverse=True)
 
-    print(ranking_list)
-
     if (accepted_doc_id == None):
         tf_idf_doc_list = [y for x, y in ranking_list]
     else:
