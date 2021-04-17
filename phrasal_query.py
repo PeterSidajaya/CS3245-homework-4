@@ -59,7 +59,7 @@ def two_word_phrasal_query(word1, word2):
 	result = []
 	while idx1 < len(listOfTriples1) and idx2 < len(listOfTriples2):
 		# The DOC_ID is the same at our two list pointers
-		if listOfTriples1[idx1][DOC_ID] == listOfTriples[idx2][DOC_ID]:
+		if listOfTriples1[idx1][DOC_ID] == listOfTriples2[idx2][DOC_ID]:
 			# If the document contains the phrase, add it to the result
 			if two_list_phrasal_query(listOfTriples1[idx1][POS_LIST],
 								   listOfTriples2[idx2][POS_LIST]):
@@ -67,7 +67,7 @@ def two_word_phrasal_query(word1, word2):
 			idx1 += 1
 			idx2 += 1
 		# The DOC_ID's are different - increment the lesser one
-		elif listOfTriples1[idx1][DOC_ID] < listOfTriples[idx2][DOC_ID]:
+		elif listOfTriples1[idx1][DOC_ID] < listOfTriples2[idx2][DOC_ID]:
 			idx1 += 1
 		else:
 			idx2 += 1
