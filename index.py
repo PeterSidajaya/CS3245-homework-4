@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from index_helper import *
+from index_helper import index_text
 from constants import *
 
 import re
@@ -23,8 +23,8 @@ def build_index(doc_id, out_dict, out_postings):
     then output the dictionary file and postings file
     """
     stemmer = nltk.stem.PorterStemmer()
-
     dictionary = {}
+
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
 
@@ -61,10 +61,10 @@ def build_index(doc_id, out_dict, out_postings):
                 tf, position_list = tup
                 if term not in dictionary:
                     # First entry is df
-                    dictionary[term] = (1, [(int(doc_id), tf, position_list),])      
+                    dictionary[term] = (1, [(int(doc_id), tf, position_list)])      
                 else:
                     df = dictionary[term][0] + 1
-                    posting_list = dictionary[term][1] + [(int(doc_id), tf, position_list),]
+                    posting_list = dictionary[term][1] + [(int(doc_id), tf, position_list)]
                     dictionary[term] = (df, posting_list)
                 # Document length is calculated from tf
                 length += (1 + math.log(tf, 10)) ** 2       
@@ -93,6 +93,8 @@ def build_index(doc_id, out_dict, out_postings):
     posting_file.close()
     dictionary_file.close()
 
+
+# Main function starts here
 input_directory = output_file_dictionary = output_file_postings = None
 
 try:

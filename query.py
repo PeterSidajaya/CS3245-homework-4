@@ -1,32 +1,59 @@
 from collections import Counter
+from phrasal_query import get_phrasal_query_doc_id
+from query_util import categorise_query, QueryType
 import nltk
 import pickle
 import math
 
 # this function will be used to run if there is phrasal query
 def intersect_document_ids(doc_list):
-    # sort by lower domain first
     if (len(doc_list) == 1):
         return doc_list[0]
 
+    # sort by lower domain first
     doc_list.sort(key=len)
     return set(doc_list[0]).intersection(*doc_list[1:])
 
 
-def search(query_list, dictionary, postings_file, possible_doc_list):
+def process_query(query_string, dictionary, posting_file):
+    # Categorise query
+    query_clauses = categorise_query(query_string)
+    phrasal_results = []
+
+    # We only do search on phrasal queries first
+    contains_phrasal_query = False
+
+    for query_clause in query_clauses:
+        if query_clause[1] == QueryType.PHRASAL:
+            phrasal_query_docs = get_phrasal_query_doc_id(query_clause[0], dictionary, posting_file)
+            phrasal_results.append(phrasal_query_docs)
+            contains_phrasal_query = True
+
+    # From the list of phrasal results, we do free text search
+    query_list = " ".join([word for word, word_type in query_clauses]).split(" ")
+
+    if contains_phrasal_query:
+        # Combine phrasal results
+        phrasal_result_doc_id = intersect_document_ids(phrasal_results)
+        final_result = free_text_search(query_list, dictionary, posting_file, phrasal_result_doc_id)
+    else:
+        final_result = free_text_search(query_list, dictionary, posting_file, None)
+
+    return final_result
+
+
+def free_text_search(query_list, dictionary, posting_file, accepted_doc_id):
     """rank the list of document based on the query given
 
     Args:
         query_list (list): the list of query string to be ranked against
         dictionary (dictionary): dictionary of the posting lists
-        postings_file (str): address to the posting file list
-        possible_doc_list (list): list of valid doc_id from phrasal queries in the given query text
+        posting_file (str): address to the posting file list
+        accepted_doc_id (set): set of valid doc_id from phrasal queries in the given query text
 
     Returns:
         str: search rank result
     """
-    posting_file = open(postings_file, 'rb')
-
     # all tokenization should consistent with the one from index.py
     stemmer = nltk.stem.PorterStemmer()
     token_list = list(map(lambda x: stemmer.stem(x).lower(), query_list))
@@ -90,7 +117,7 @@ def search(query_list, dictionary, postings_file, possible_doc_list):
             posting_file.seek(term_pointer)
             posting_list = pickle.load(posting_file)
             
-            for (doc_id, term_freq) in posting_list:
+            for (doc_id, term_freq, _) in posting_list:
                 tf_idf_score = 1 + math.log(term_freq, 10)  # tf
                 document_term_dict[term][doc_id] = tf_idf_score / dictionary["LENGTH"][doc_id]  # normalize score
                 potential_document_id.add(doc_id)
@@ -118,9 +145,12 @@ def search(query_list, dictionary, postings_file, possible_doc_list):
         ranking_list.append((score, doc_id))
         ranking_list.sort(key=lambda x: x[0], reverse=True)
 
-    tf_idf_doc_list = [y for x, y in ranking_list]
-    final_doc_list = set(tf_idf_doc_list) - possible_doc_list
-    return " ".join(str(doc_id) for doc_id in list(final_doc_list))
+    if (accepted_doc_id == None):
+        tf_idf_doc_list = [y for x, y in ranking_list]
+    else:
+        tf_idf_doc_list = [y for x, y in ranking_list if y in accepted_doc_id]
+        
+    return " ".join(str(doc_id) for doc_id in tf_idf_doc_list)
 
 
 def normalize_list(lst, denominator):
