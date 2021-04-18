@@ -1,5 +1,6 @@
 from index_helper import get_word_list
 import nltk
+from constants import DOC_ID, POS_LIST
 
 def stem_word(word):
 	"""
@@ -37,21 +38,39 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 
 		print("Three words: {}, {}, {}".format(words[0], words[1], words[2]))
 		return three_word_phrasal_query(word_list_1, word_list_2, word_list_3)
+	# Just handling an edge case
+	elif len(words) == 1:
+		word_list_1 = get_word_list(words[0], dictionary, posting_file)
+		return one_word_phrasal_query(word_list_1)
+	# The phrasal query with more than 3 words is illegal
 	else:
 		return []
 
+def one_word_phrasal_query(word_list_1):
+	"""
+	Given a list of posting lists, return the docId's which result from the phrasal query.
+
+	List of posting lists word_list_1 should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
+
+	Arguments:
+		word_list_1 	The postings list for the first word in the phrase 
+	Returns:
+		list[docId] 	A list of integers representing the doc Ids containing the phrase
+	"""
+	return list(map(lambda triplet: triplet[DOC_ID], word_list_1))
 
 def two_word_phrasal_query(word_list_1, word_list_2):
 	"""
-	Given two words, return the docId's which result from the phrasal query.
+	Given two lists of posting lists, return the docId's which result from the phrasal query.
+
+	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
 	Arguments:
-		word1 		The first word in the phrase
-		word2 		The second word in the phrase
+		word_list_1 	The list of postings lists for the first word in the phrase 
+		word_list_2 	The list of postings lists for the second word in the phrase
 	Returns:
 		list[docId] A list of integers representing the doc Ids containing a phrase
 	"""
-	DOC_ID, TF, POS_LIST = 0, 1, 2
 
 	idx1, idx2 = 0, 0
 	result = []
@@ -112,14 +131,15 @@ def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
 	"""
 	Given two words, return the docId's which result from the phrasal query.
 
+	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
+
 	Arguments:
-		word1 		The first word in the phrase
-		word2 		The second word in the phrase
+		word_list_1 	The list of postings lists for the first word in the phrase 
+		word_list_2 	The list of postings lists for the second word in the phrase 
+		word_list_3 	The list of postings lists for the third word in the phrase 
 	Returns:
 		list[docId] A list of integers representing the doc Ids containing a phrase
 	"""
-	DOC_ID, TF, POS_LIST = 0, 1, 2
-
 	idx1, idx2, idx3 = 0, 0, 0
 	result = []
 	while idx1 < len(word_list_1) and idx2 < len(word_list_2) and idx3 < len(word_list_3):
