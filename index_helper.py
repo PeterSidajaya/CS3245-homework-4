@@ -35,6 +35,8 @@ def get_word_list(term, dictionary, posting_file):
     Returns:
         list: [(doc Id, term frequency, position list), ...]
     """
+    if (term not in dictionary):
+        return []
 
     pointer = dictionary[term][1]
     posting_file.seek(pointer)

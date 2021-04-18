@@ -1,6 +1,6 @@
 from index_helper import get_word_list
-import nltk
 from constants import DOC_ID, POS_LIST
+import nltk
 
 def stem_word(word):
 	"""
@@ -25,26 +25,27 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	words = query_string.split()
 	words = list(map(lambda word: stem_word(word), words))
 
-	if len(words) == 2:
+	if len(words) == 1:  # Just handling an edge case
+		print("One words: {}".format(words[0]))
+		word_list_1 = get_word_list(words[0], dictionary, posting_file)
+		
+		return one_word_phrasal_query(word_list_1)
+	elif len(words) == 2:
+		print("Two words: {}, {}".format(words[0], words[1]))
 		word_list_1 = get_word_list(words[0], dictionary, posting_file)
 		word_list_2 = get_word_list(words[1], dictionary, posting_file)
 		
-		print("Two words: {}, {}".format(words[0], words[1]))
 		return two_word_phrasal_query(word_list_1, word_list_2)
 	elif len(words) == 3:
+		print("Three words: {}, {}, {}".format(words[0], words[1], words[2]))
 		word_list_1 = get_word_list(words[0], dictionary, posting_file)
 		word_list_2 = get_word_list(words[1], dictionary, posting_file)
 		word_list_3 = get_word_list(words[2], dictionary, posting_file)
 
-		print("Three words: {}, {}, {}".format(words[0], words[1], words[2]))
 		return three_word_phrasal_query(word_list_1, word_list_2, word_list_3)
-	# Just handling an edge case
-	elif len(words) == 1:
-		word_list_1 = get_word_list(words[0], dictionary, posting_file)
-		return one_word_phrasal_query(word_list_1)
-	# The phrasal query with more than 3 words is illegal
-	else:
+	else: # The phrasal query with more than 3 words is illegal
 		return []
+
 
 def one_word_phrasal_query(word_list_1):
 	"""
@@ -57,7 +58,8 @@ def one_word_phrasal_query(word_list_1):
 	Returns:
 		list[docId] 	A list of integers representing the doc Ids containing the phrase
 	"""
-	return list(map(lambda triplet: triplet[DOC_ID], word_list_1))
+	return [triplet[DOC_ID] for triplet in word_list_1]
+
 
 def two_word_phrasal_query(word_list_1, word_list_2):
 	"""
