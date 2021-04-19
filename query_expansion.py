@@ -19,7 +19,7 @@ nltk.download('averaged_perceptron_tagger')
 # https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
 # https://www.nltk.org/howto/wordnet.html#similarityery
 
-def expand_clause(clause: (str, QueryType), lemmatzr):
+def expand_clause(clause: (str, QueryType)):
     """
     Apply expansion technique to the given clause.
     The clause will be stemmed by the given lemmatizer.
@@ -32,7 +32,7 @@ def expand_clause(clause: (str, QueryType), lemmatzr):
 
     # Tokenise and get all possible synonyms
     expression = clause[0]    
-    token_syn_sets = tokenise_and_get_synsets(expression, lemmatzr)   
+    token_syn_sets = tokenise_and_get_synsets(expression)   
 
     expanded_tokens = []
     for token_syn_set in token_syn_sets:
@@ -62,7 +62,7 @@ def pos_to_wordnet(tag):
         return wordnet.VERB
     return None
 
-def tokenise_and_get_synsets(expression: str, lemmatzr):
+def tokenise_and_get_synsets(expression: str):
     """
     Given an expression, tokenise it and get the synonyms for each token.
     Each token will be stemmed.
@@ -88,11 +88,8 @@ def tokenise_and_get_synsets(expression: str, lemmatzr):
         if not wn_tag:
             continue
 
-        # Apply stemmer and convert to lowercase
-        stemmed = lemmatzr.lemmatize(word, pos=wn_tag).lower()
-
         # Format is to synset format, remove duplicate and add it to the list
-        syn_sets.append(remove_duplicate_synsets(wordnet.synsets(stemmed, pos=wn_tag)))
+        syn_sets.append(remove_duplicate_synsets(wordnet.synsets(word, pos=wn_tag)))
 
     return syn_sets
 

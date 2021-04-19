@@ -63,17 +63,29 @@ def categorise_query(query: str):
         clause = spliced_query[:next_idx].strip()
 
         if (len(clause) > 0):
-          op_type = BooleanOp.AND if closest_keyword == AND_KEYWORD else BooleanOp.OR
-          query_clauses.append((clause, clause_type, BooleanOp.OR))
+            op_type = BooleanOp.AND if closest_keyword == AND_KEYWORD else BooleanOp.OR
+            query_clauses.append((clause, clause_type, BooleanOp.OR))
 
         # When we encounter AND, the previous clause is connected by AND
         if (closest_keyword == AND_KEYWORD and len(query_clauses) > 0):
-          query_clauses[-1] = (query_clauses[-1][0], query_clauses[-1][1], BooleanOp.AND)
+            query_clauses[-1] = (query_clauses[-1][0], query_clauses[-1][1], BooleanOp.AND)
 
         # Update position
         curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(closest_keyword)
 
     return query_clauses
+
+def intersect_document_ids(doc_list1, doc_list2):
+    doc_list = [doc_list1, doc_list2]
+
+    # sort by lower domain first
+    doc_list.sort(key=len)
+    return list(set(doc_list[0]).intersection(*doc_list[1:]))
+
+def union_document_ids(doc_list1, doc_list2):
+    doc_list = [doc_list1, doc_list2]
+
+    return list(set(doc_list[0]).union(*doc_list[1:]))
 
 ############ HELPERS ############
 
