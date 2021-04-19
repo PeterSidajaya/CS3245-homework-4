@@ -29,7 +29,7 @@ def build_index(doc_id, out_dict, out_postings):
     dictionary = {}
 
     # # For testing purposes
-    # limit = 10000
+    # limit = 1000
 
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
@@ -79,13 +79,14 @@ def build_index(doc_id, out_dict, out_postings):
 
             # This line is if you want to do lemmatization instead
             # token_list = list(map(lambda x: lemmatizer.lemmatize(x.lower()), filtered_list))
-            
-            multiple_doc_list.append((doc_id, token_list))
+
+            multiple_doc_list.append((int(doc_id), token_list))
             files_in_block += 1
 
             # If the number of files scanned has reach block size, then invert first
             if files_in_block == SPIMI_BLOCK_SIZE:
                 print('Inverting block number ' + str(num_of_blocks + 1))
+                multiple_doc_list.sort()
                 invert(multiple_doc_list, POSTING_DIR + 'temp_dictionary_0_' + str(num_of_blocks) + '.txt', POSTING_DIR + 'temp_posting_0_' + str(num_of_blocks) + '.txt')
                 num_of_blocks += 1
                 files_in_block = 0
@@ -94,6 +95,7 @@ def build_index(doc_id, out_dict, out_postings):
     # Invert the remaining block
     if (files_in_block != 0):
         print('Inverting block number ' + str(num_of_blocks + 1))
+        multiple_doc_list.sort()
         invert(multiple_doc_list, POSTING_DIR + 'temp_dictionary_0_' + str(num_of_blocks) + '.txt', POSTING_DIR + 'temp_posting_0_' + str(num_of_blocks) + '.txt')
         num_of_blocks += 1
         multiple_doc_list = []
