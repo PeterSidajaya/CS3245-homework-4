@@ -1,6 +1,9 @@
 from collections import Counter
 from phrasal_query import get_phrasal_query_doc_id
 from query_util import categorise_query, QueryType
+from nltk.stem import WordNetLemmatizer
+from query_expansion import expand_clause
+
 import nltk
 import pickle
 import math
@@ -19,18 +22,20 @@ def process_query(query_string, dictionary, posting_file):
     # Categorise query
     query_clauses = categorise_query(query_string)
     phrasal_results = []
+    query_list = []
 
     # We only do search on phrasal queries first
     contains_phrasal_query = False
+    lemmatizer = WordNetLemmatizer()
 
     for query_clause in query_clauses:
         if query_clause[1] == QueryType.PHRASAL:
             phrasal_query_docs = get_phrasal_query_doc_id(query_clause[0], dictionary, posting_file)
             phrasal_results.append(phrasal_query_docs)
             contains_phrasal_query = True
-
-    # From the list of phrasal results, we do free text search
-    query_list = " ".join([word for word, word_type in query_clauses]).split(" ")
+        elif query_clause[1] == QueryType.FREE_TEXT:
+            expanded_clause = expand_clause((query_clause[0], QueryType.FREE_TEXT), lemmatizer)
+            query_list.extend(expanded_clause[0].split(" "))
 
     if contains_phrasal_query:
         # Combine phrasal results

@@ -5,21 +5,12 @@ from nltk.corpus import wordnet
 from query_util import QueryType
 from constants import *
 
-# TODO: Move to search.py / query.py
-from nltk.stem import WordNetLemmatizer
-
-# TODO: Move to index.py
-import nltk
-nltk.download('wordnet')
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
-
 # Sources
 # https://stackoverflow.com/questions/27591621/nltk-convert-tokenized-sentence-to-synset-format
 # https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
 # https://www.nltk.org/howto/wordnet.html#similarityery
 
-def expand_clause(clause: (str, QueryType), lemmatzr):
+def expand_clause(clause: (str, QueryType), lemmatizer):
     """
     Apply expansion technique to the given clause.
     The clause will be stemmed by the given lemmatizer.
@@ -31,21 +22,25 @@ def expand_clause(clause: (str, QueryType), lemmatzr):
         return
 
     # Tokenise and get all possible synonyms
-    expression = clause[0]    
-    token_syn_sets = tokenise_and_get_synsets(expression, lemmatzr)   
+    expression = clause[0]
+    expression_list = expression.split(" ")    
+    synsets_token = tokenise_and_get_synsets(expression, lemmatizer)   
 
     expanded_tokens = []
-    for token_syn_set in token_syn_sets:
+    for i in range(len(synsets_token)):
         # The first synonym is always the word itself, so add 1 more
-        synonyms = get_top_k_synonyms(token_syn_set, EXPAND_NUM_OF_SYNONYMS + 1)
+        synonyms = get_top_k_synonyms(synsets_token[i], EXPAND_NUM_OF_SYNONYMS + 1)
 
         # Concat everything
-        expanded_token = ' '.join(map(lambda x: x.lemma_names()[0], synonyms))
+        synonym_names = [synonym.lemma_names()[0] for synonym in synonyms]
+        if (expression_list[i] not in synonym_names):
+            synonym_names.insert(0, expression)
+
+        expanded_token = ' '.join(synonym_names)
         expanded_tokens.append(expanded_token)
     
     return (' '.join(expanded_tokens), clause[1])
 
-############ HELPERS ############
 
 def pos_to_wordnet(tag):
     """
@@ -62,7 +57,8 @@ def pos_to_wordnet(tag):
         return wordnet.VERB
     return None
 
-def tokenise_and_get_synsets(expression: str, lemmatzr):
+
+def tokenise_and_get_synsets(expression: str, lemmatizer):
     """
     Given an expression, tokenise it and get the synonyms for each token.
     Each token will be stemmed.
@@ -79,7 +75,7 @@ def tokenise_and_get_synsets(expression: str, lemmatzr):
                                   [Synset('dog.n.01'), Synset('frump.n.01'), Synset('cad.n.01'), ...]]
     """
     tagged = pos_tag(word_tokenize(expression))
-    syn_sets = []
+    synsets = []
 
     for token in tagged:
         # Assign tag, whether its noun/verb/etc
@@ -89,14 +85,15 @@ def tokenise_and_get_synsets(expression: str, lemmatzr):
             continue
 
         # Apply stemmer and convert to lowercase
-        stemmed = lemmatzr.lemmatize(word, pos=wn_tag).lower()
+        stemmed = lemmatizer.lemmatize(word, pos=wn_tag).lower()
 
         # Format is to synset format, remove duplicate and add it to the list
-        syn_sets.append(remove_duplicate_synsets(wordnet.synsets(stemmed, pos=wn_tag)))
+        synsets.append(remove_duplicate_synsets(wordnet.synsets(stemmed, pos=wn_tag)))
 
-    return syn_sets
+    return synsets
 
-def remove_duplicate_synsets(syn_sets):
+
+def remove_duplicate_synsets(synsets):
     """
     Remove duplicate from synsets. Synsets must be in format of word.nn.pos.
     Duplicate is detected from its lemmas_names, and not from its nn and pos.
@@ -109,17 +106,18 @@ def remove_duplicate_synsets(syn_sets):
     words_encountered = {}
     unique_synsets = []
 
-    for syn_set in syn_sets:
-        word_name = syn_set.lemma_names()[0]
+    for synset in synsets:
+        word_name = synset.lemma_names()[0].lower()
         if word_name in words_encountered:
-          continue
+            continue
         
         words_encountered[word_name] = True
-        unique_synsets.append(syn_set)
+        unique_synsets.append(synset)
 
     return unique_synsets
 
-def get_top_k_synonyms(syn_sets, k: int):
+
+def get_top_k_synonyms(synsets, k: int):
     """
     Extract top k synonyms with the highest similarity score with
     the first synset. 
@@ -132,11 +130,14 @@ def get_top_k_synonyms(syn_sets, k: int):
     For various similarity functions, please refer to:
     https://www.nltk.org/howto/wordnet.html#similarityery
     """
+    if (not synsets):
+        return []
+    
     # Syn_sets are ordered by frequency, so first element is the most probable word w/o context
-    syn_to_compare = syn_sets[0]
+    syn_to_compare = synsets[0]
 
-    # Create a new list where each element is (syn_set, similarity score)
-    sim_score = [(syn_sets[i], syn_to_compare.wup_similarity(syn_sets[i])) for i in range(len(syn_sets))]
+    # Create a new list where each element is (synset, similarity score)
+    sim_score = [(synsets[i], syn_to_compare.wup_similarity(synsets[i])) for i in range(len(synsets))]
 
     # Sort from highest to lowest score
     sorted(sim_score, key=lambda syn: syn[1] if syn[1] != None else 0, reverse=True)
