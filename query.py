@@ -33,7 +33,7 @@ def process_query(query_string, dictionary, posting_file):
             free_text_list = clause_word.split(" ")
             curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
 
-        # Combine with the exisiting results
+        # Combine with the existing results
         if last_op_type == BooleanOp.AND:
             result = intersect_document_ids(result, curr_result)
         elif last_op_type == BooleanOp.OR:
