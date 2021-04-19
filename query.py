@@ -30,7 +30,7 @@ def process_query(query_string, dictionary, posting_file):
             contains_phrasal_query = True
 
     # From the list of phrasal results, we do free text search
-    query_list = " ".join([word for word, word_type in query_clauses]).split(" ")
+    query_list = " ".join([word for word, _, _ in query_clauses]).split(" ")
 
     if contains_phrasal_query:
         # Combine phrasal results
