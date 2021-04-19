@@ -1,6 +1,9 @@
+from nltk.stem import WordNetLemmatizer
 from collections import Counter
 from phrasal_query import get_phrasal_query_doc_id
-from query_util import categorise_query, QueryType
+from query_util import categorise_query, QueryType, BooleanOp
+from query_expansion import expand_clause
+
 import nltk
 import pickle
 import math
@@ -16,31 +19,50 @@ def intersect_document_ids(doc_list):
 
 
 def process_query(query_string, dictionary, posting_file):
+    lemmatzr = WordNetLemmatizer()
+
     # Categorise query
     query_clauses = categorise_query(query_string)
-    phrasal_results = []
+    
+    # Lemmatise
+    lemmatized_query_clauses = list(map(lambda clause: (lemmatzr.lemmatize(clause[0]).lower(), clause[1], clause[2]), query_clauses))
 
-    # We only do search on phrasal queries first
-    contains_phrasal_query = False
+    last_op_type = BooleanOp.OR
+    results = []
+    
+    for query_clause in lemmatized_query_clauses:
+        clause_word, clause_type, op_type = query_clause
+        curr_result = []
 
-    for query_clause in query_clauses:
-        if query_clause[1] == QueryType.PHRASAL:
-            phrasal_query_docs = get_phrasal_query_doc_id(query_clause[0], dictionary, posting_file)
-            phrasal_results.append(phrasal_query_docs)
-            contains_phrasal_query = True
+        # Get result for the current clause
+        if clause_type == QueryType.PHRASAL:
+            curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
+        elif clause_type == QueryType.FREE_TEXT:
+            # If we want to use clause expansion, use this
+            # clause_word = expand_clause(query_clause)
+            
+            free_text_list = clause_word.split(" ")
+            # TODO: Just do a simple free text search
+            # curr_result = free_text_search(free_text_list, dictionary, posting_file, None)
 
-    # From the list of phrasal results, we do free text search
-    query_list = " ".join([word for word, word_type in query_clauses]).split(" ")
+        # Combine with the exisiting results
+        if last_op_type == BooleanOp.AND:
+            # TODO: Intersect the two lists
+            continue
+        elif last_op_type == BooleanOp.OR:
+            # TODO: Union the two lists
+            continue          
 
-    if contains_phrasal_query:
-        # Combine phrasal results
-        phrasal_result_doc_id = intersect_document_ids(phrasal_results)
-        final_result = free_text_search(query_list, dictionary, posting_file, phrasal_result_doc_id)
-    else:
-        final_result = free_text_search(query_list, dictionary, posting_file, None)
+        # Update for next clause
+        last_op_type = op_type
+
+    # Score and rank
+    query_list = " ".join([clause_word for clause, clause_type, op_type in query_clauses]).split(" ")
+    final_result = free_text_search(query_list, dictionary, posting_file, results)
 
     return final_result
 
+# TODO: make ranking a parameter/split the function
 
 def free_text_search(query_list, dictionary, posting_file, accepted_doc_id):
     """rank the list of document based on the query given
