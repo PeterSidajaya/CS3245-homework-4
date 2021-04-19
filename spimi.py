@@ -14,10 +14,10 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     """
     dictionary = {}
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        # This is where we'll store the length of each docs
-    length = 0
 
     for doc_id, token_list in multiple_doc_list:
         content_dict = index_text(token_list)
+        length = 0
 
         # Calculate and precompute df and length
         for term, tup in content_dict.items():
