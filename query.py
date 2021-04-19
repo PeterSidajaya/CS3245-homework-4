@@ -43,7 +43,7 @@ def process_query(query_string, dictionary, posting_file):
         last_op_type = op_type
 
     # Score and rank
-    query_list = " ".join([clause_word for clause, clause_type, op_type in query_clauses]).split(" ")
+    query_list = " ".join([clause_word for clause_word, clause_type, op_type in query_clauses]).split(" ")
     final_result = free_text_search(query_list, dictionary, posting_file, results, do_ranking=True)
 
     return final_result
