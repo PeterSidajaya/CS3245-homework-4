@@ -8,6 +8,14 @@ from query_util import *
 from constants import *
 
 def process_query(query_string, dictionary, posting_file):
+    """
+    Perform a search based on the given query. 
+
+    The query will be preprocessed before search can be done.
+    Preprocessing here refer to the query will be split into parts 
+    (details under categorise_query()), referred as clauses;
+    then apply lemmatization on each query clause.
+    """
     lemmatzr = WordNetLemmatizer()
 
     # Categorise query
