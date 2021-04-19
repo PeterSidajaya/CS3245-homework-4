@@ -56,18 +56,13 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_r
     # calculate tf_score for each term (if it exists in the dictionary)
     for term in query_keys:
         tf_score = 0
-
-        if (term in dictionary):
-            posting_list = get_word_list(term, dictionary, posting_file)
-            
-            for (doc_id, term_freq, _) in posting_list:
-                tf_score = 1 + math.log(term_freq, 10)  # tf
-                document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
-                potential_document_id.add(doc_id)
+        posting_list = get_word_list(term, dictionary, posting_file)
+        
+        for (doc_id, term_freq, _) in posting_list:
+            tf_score = 1 + math.log(term_freq, 10)  # tf
+            document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
+            potential_document_id.add(doc_id)
     
-    # sort the list in case two or more document_id score the same
-    potential_document_id = sorted(list(potential_document_id))
-
     # calculate cosine score
     for doc_id in potential_document_id:
         document_term_vector = []
