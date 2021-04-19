@@ -29,21 +29,20 @@ def categorise_query(query: str):
     query_clauses = []
     is_last_keyword_quote = False
 
-    # i = 0
     while curr_str_idx != -1 and curr_str_idx < len(query):
         spliced_query = query[curr_str_idx:]
         clause = ""
+        clause_type = None
         closest_keyword_pos = 0
         closest_keyword = ""
 
-        print("Spliced query: {}".format(spliced_query))
         if (is_last_keyword_quote):
             # Find the next double quote
             closest_keyword_pos = spliced_query.find(DOUBLE_QUOTE_KEYWORD)
             closest_keyword = DOUBLE_QUOTE_KEYWORD
 
             is_last_keyword_quote = False
-            print("Finding the next DQUOTE: {}".format(closest_keyword_pos))
+            clause_type = QueryType.PHRASAL
         
         else:
             # Finding closest query keyword
@@ -53,19 +52,18 @@ def categorise_query(query: str):
             closest_keyword = QUERY_KEYWORDS[closest_keyword_idx]
 
             is_last_keyword_quote = closest_keyword == DOUBLE_QUOTE_KEYWORD
-            print("Finding the next KEYWORD: {}".format(closest_keyword_pos))
+            clause_type = QueryType.FREE_TEXT
         
         # If there is no more keyword, we splice until the end of the string
         next_idx = len(spliced_query) if closest_keyword_pos == -1 else closest_keyword_pos
         clause = spliced_query[:next_idx].strip()
-        print("Curr idx: {}, next_idx: {}".format(curr_str_idx, next_idx))
+
         if (len(clause) > 0):
-          print("Clause: {}".format(clause))
+          op_type = BooleanOp.AND if closest_keyword == AND_KEYWORD else BooleanOp.OR
+          query_clauses.append((clause, clause_type, op_type))
 
         # Update position
         curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(closest_keyword)
-        print("New curr Idx: {}".format(curr_str_idx))
-        print()
 
     return query_clauses
 
