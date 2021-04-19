@@ -43,9 +43,9 @@ def process_query(query_string, dictionary, posting_file):
 
         # Combine with the existing results
         if last_op_type == BooleanOp.AND:
-            result = intersect_document_ids(result, curr_result)
+            results = intersect_document_ids(results, curr_result)
         elif last_op_type == BooleanOp.OR:
-            result = union_document_ids(result, curr_result)
+            results = union_document_ids(results, curr_result)
 
         # Update for next clause
         last_op_type = op_type
