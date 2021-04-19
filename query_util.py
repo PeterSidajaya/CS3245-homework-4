@@ -15,12 +15,16 @@ class BooleanOp(Enum):
 def categorise_query(query: str):
     """
     Output a list of clauses, where each element is a tuple
-    of the clause and its type.
+    of the clause, its type, and the boolean operator to connect with the next element.
     
-    Multiple clause implies that each clause is connected via AND operator.
+    Each clause will be tagged with the clause type and its boolean operator.
+    Boolean operator is used to connect to the next clause.
+
+    This method reads the query from left to right; stopping at every keywords ('"', AND)
+    and determine that the substring in between as keywords as clauses.
 
     e.g. Input: "little puppy" AND chihuahua 
-         Output: [<little puppy, QueryType.PHRASAL>, <chihuahua, QueryType.FREE_TEXT>]
+         Output: [('little puppy', <QueryType.PHRASAL>, <BooleanOp.AND>), ('chihuahua', <QueryType.FREE_TEXT>, <BooleanOp.OR>)]
     """
     if (len(query) < 1):
       return
@@ -60,7 +64,11 @@ def categorise_query(query: str):
 
         if (len(clause) > 0):
           op_type = BooleanOp.AND if closest_keyword == AND_KEYWORD else BooleanOp.OR
-          query_clauses.append((clause, clause_type, op_type))
+          query_clauses.append((clause, clause_type, BooleanOp.OR))
+
+        # When we encounter AND, the previous clause is connected by AND
+        if (closest_keyword == AND_KEYWORD and len(query_clauses) > 0):
+          query_clauses[-1] = (query_clauses[-1][0], query_clauses[-1][1], BooleanOp.AND)
 
         # Update position
         curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(closest_keyword)
@@ -70,10 +78,16 @@ def categorise_query(query: str):
 ############ HELPERS ############
 
 def find_closest_idx(keywords_pos):
+    """
+    Given a list of integer, returns the smallest index that is above -1.
+    """
     smallest_idx = math.inf
+    smallest_pos = math.inf
+
     for idx, pos in enumerate(keywords_pos):
-        if pos > -1 and pos < smallest_idx:
+        if pos > -1 and pos < smallest_pos:
             smallest_idx = idx
+            smallest_pos = pos
 
     smallest_idx = -1 if math.isinf(smallest_idx) else smallest_idx
     return smallest_idx
