@@ -1,6 +1,7 @@
 ### INDEX ###
 DOCUMENT_LENGTH_KEYWORD = "LENGTH"
 SPIMI_BLOCK_SIZE = 1000
+POSTING_DIR = "temp_postings_result_dir/" 
 
 ### REGEX ###
 AND_REGEX = "AND"

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-from index_helper import index_text
 from constants import *
+from spimi import invert, merge_files
 
 import re
 import nltk
@@ -8,9 +8,11 @@ import sys
 import getopt
 import os
 import pickle
-import math
 import string
 import csv
+import shutil
+import math
+
 
 def usage():
     print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
@@ -23,7 +25,11 @@ def build_index(doc_id, out_dict, out_postings):
     then output the dictionary file and postings file
     """
     stemmer = nltk.stem.PorterStemmer()
+    lemmatizer = nltk.stem.WordNetLemmatizer()
     dictionary = {}
+
+    # # For testing purposes
+    # limit = 10000
 
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
@@ -38,60 +44,82 @@ def build_index(doc_id, out_dict, out_postings):
         except OverflowError:
             max_int = int(max_int/10)
 
+    if not os.path.exists(POSTING_DIR):
+        os.mkdir(POSTING_DIR)
+    else:
+        shutil.rmtree(POSTING_DIR)
+        os.mkdir(POSTING_DIR)
+
     # Opens the csv
     with open(doc_id, newline='', encoding='UTF-8') as f:
         reader = csv.reader(f)
+
+        # this is the tokens that will be passed through to the invert() function
+        multiple_doc_list = []
+
+        num_of_blocks = 0
+        files_in_block = 0
 
         for idx, row in enumerate(reader):
             # Skip first row
             if idx == 0:                  
                 continue
 
+            # # End if limit is reached, for testing purposes
+            # if idx == limit:
+            #     break
+
             doc_id, title, content, date_posted, court = row
 
             word_list = nltk.tokenize.word_tokenize(content)
             filtered_list = [text for text in word_list if text not in string.punctuation]
             token_list = list(map(lambda x: stemmer.stem(x).lower(), filtered_list))
+            multiple_doc_list.append((doc_id, token_list))
+            files_in_block += 1
 
-            content_dict = index_text(token_list)
-            length = 0
-
-            # Calculate and precompute df and length
-            for term, tup in content_dict.items():
-                tf, position_list = tup
-                if term not in dictionary:
-                    # First entry is df
-                    dictionary[term] = (1, [(int(doc_id), tf, position_list)])      
-                else:
-                    df = dictionary[term][0] + 1
-                    posting_list = dictionary[term][1] + [(int(doc_id), tf, position_list)]
-                    dictionary[term] = (df, posting_list)
-                # Document length is calculated from tf
-                length += (1 + math.log(tf, 10)) ** 2       
-            
-            # Calculate document length for document normalization in search
-            dictionary[DOCUMENT_LENGTH_KEYWORD][int(doc_id)] = math.sqrt(length)
-
-    # Deals with pickles
-    posting_file = open(out_postings, 'wb')
-    dictionary_file = open(out_dict, 'wb')
-    
-    # Delete existing contents
-    posting_file.truncate(0)                    
-    dictionary_file.truncate(0)
-
-    # Store posting_lists and dictionary to files
-    for term, value in dictionary.items():
-        if term == DOCUMENT_LENGTH_KEYWORD:     # LENGTH is not a term
-            continue
-        df, posting_list = value
-        pointer = posting_file.tell()           # find our current position in the posting file
-        pickle.dump(posting_list, posting_file) # dump the posting list into the posting file
-        dictionary[term] = (df, pointer)        # keep track of the pointer
+            # If the number of files scanned has reach block size, then invert first
+            if files_in_block == SPIMI_BLOCK_SIZE:
+                print('Inverting block number ' + str(num_of_blocks + 1))
+                invert(multiple_doc_list, POSTING_DIR + 'temp_dictionary_0_' + str(num_of_blocks) + '.txt', POSTING_DIR + 'temp_posting_0_' + str(num_of_blocks) + '.txt')
+                num_of_blocks += 1
+                files_in_block = 0
+                multiple_doc_list = []
         
-    pickle.dump(dictionary, dictionary_file)    # dump the dictionary into the dictionary file
-    posting_file.close()
-    dictionary_file.close()
+    # Invert the remaining block
+    if (files_in_block != 0):
+        print('Inverting block number ' + str(num_of_blocks + 1))
+        invert(multiple_doc_list, POSTING_DIR + 'temp_dictionary_0_' + str(num_of_blocks) + '.txt', POSTING_DIR + 'temp_posting_0_' + str(num_of_blocks) + '.txt')
+        num_of_blocks += 1
+        multiple_doc_list = []
+
+
+    # MERGING STAGE, binary merging (iterate until height of binary tree)
+    for i in range(math.ceil(math.log(num_of_blocks, 2))): 
+        # Generation: #i
+        k = 0
+        for j in range(0, num_of_blocks, 2):
+            if j + 1 < num_of_blocks:
+                # do the merging process
+                # Merging block: j and j+1
+                merge_files(POSTING_DIR + 'temp_dictionary_' + str(i) + '_' + str(j) + '.txt', POSTING_DIR + 'temp_posting_'+str(i) + '_' + str(j) + '.txt',
+                            POSTING_DIR + 'temp_dictionary_' + str(i) + '_' + str(j+1) + '.txt', POSTING_DIR + 'temp_posting_'+str(i) + '_' + str(j+1) + '.txt',
+                            POSTING_DIR + 'temp_dictionary_' + str(i+1) + '_' + str(k) + '.txt', POSTING_DIR + 'temp_posting_'+str(i+1) + '_' + str(k) + '.txt')
+            else:
+                # when the number is odd (left only the last data), copy the final block instead
+                # Copying block: j
+                shutil.move(POSTING_DIR + 'temp_dictionary_' + str(i) + '_' + str(j) + '.txt', POSTING_DIR + 'temp_dictionary_' + str(i+1) + '_' + str(k) + '.txt')
+                shutil.move(POSTING_DIR + 'temp_posting_' + str(i) + '_' + str(j) + '.txt', POSTING_DIR + 'temp_posting_' + str(i+1) + '_' + str(k) + '.txt')
+            k += 1
+        num_of_blocks = k
+
+    try:
+        # rename the merged posting and dictionary files, for clarity
+        shutil.move(POSTING_DIR + 'temp_posting_' + str(i+1) + '_' + str(k-1) + '.txt', out_postings)
+        shutil.move(POSTING_DIR + 'temp_dictionary_' + str(i+1) + '_' + str(k-1) + '.txt', out_dict)
+    except Exception as ex:
+        # this is to prevent when we only want to index 1 file
+        shutil.move(POSTING_DIR + 'temp_posting_0_0.txt', out_dict)
+        shutil.move(POSTING_DIR + 'temp_dictionary_0_0.txt', out_postings)
 
 
 # Main function starts here

@@ -8,7 +8,7 @@ def index_text(token_list):
         token_list (list): list of tokens
 
     Returns:
-        freq_pos_dict: dictionary of term, (frequency, position list) pairs
+        freq_pos_dict: dictionary of term, (term frequency, position list) pairs
     """
     freq_pos_dict = {}
     index = 0
