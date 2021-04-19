@@ -90,7 +90,7 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_r
     else:
         tf_idf_doc_list = [y for x, y in ranking_list if y in accepted_doc_id]
         
-    return " ".join(str(doc_id) for doc_id in tf_idf_doc_list)
+    return tf_idf_doc_list
 
 
 def normalize_list(lst, denominator):

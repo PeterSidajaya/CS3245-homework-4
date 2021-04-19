@@ -46,4 +46,4 @@ def process_query(query_string, dictionary, posting_file):
     query_list = " ".join([clause_word for clause, clause_type, op_type in query_clauses]).split(" ")
     final_result = free_text_search(query_list, dictionary, posting_file, results, do_ranking=True)
 
-    return final_result
+    return " ".join(str(doc_id) for doc_id in final_result)
