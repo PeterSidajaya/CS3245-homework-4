@@ -61,4 +61,7 @@ def sanitise_word(string):
 
 
 def is_numeric(string):
-    return True and regex.match(r'[0-9]+[^0-9][0-9]+', string)
+    if regex.match(r'[0-9]+[^0-9][0-9]+', string):
+        return True
+    else:
+        return False
