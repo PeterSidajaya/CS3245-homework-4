@@ -142,13 +142,13 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
     # Combine the LENGTH
     length_dict1 = dictionary_1[DOCUMENT_LENGTH_KEYWORD]
     length_dict2 = dictionary_2[DOCUMENT_LENGTH_KEYWORD]
-    length_dict = length_dict1 | length_dict2               # merge two dictionaries
+    length_dict = {**length_dict1, **length_dict2}          # merge two dictionaries
     dictionary[DOCUMENT_LENGTH_KEYWORD] = length_dict
     
     # Combine the TITLE
     title_dict1 = dictionary_1[TITLE_KEYWORD]
     title_dict2 = dictionary_2[TITLE_KEYWORD]
-    title_dict = title_dict1 | title_dict2               # merge two dictionaries
+    title_dict = {**title_dict1, **title_dict2}             # merge two dictionaries
     dictionary[TITLE_KEYWORD] = title_dict
 
     # Dump the dictionary    
