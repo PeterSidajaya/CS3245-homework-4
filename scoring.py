@@ -31,11 +31,11 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
 
     # Weed out weaker results
     weighted_avg_score = get_avg_score(weighted_list)
-    weighted_list = list(filter(lambda x: x[1] > weighted_avg_score, weighted_list))
+    weighted_list = list(filter(lambda x: x[1] > (weighted_avg_score * FILTER_STRENGTH), weighted_list))
 
     # Sort
     weighted_list.sort(key=lambda x: x[1], reverse=True)
-    return weighted_list[:NUM_OF_RESULTS]
+    return weighted_list
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
     """
