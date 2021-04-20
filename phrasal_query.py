@@ -1,15 +1,8 @@
 from index_helper import get_word_list
 from constants import DOC_ID, POS_LIST
-import nltk
+from nltk import word_tokenize
 
-def lemmatize_word(word, lemmatzr):
-	"""
-	Stemming stub - should perform case folding then stemming.
-	"""
-	return lemmatzr.lemmatize(word.lower())
-
-
-def get_phrasal_query_doc_id(query_string, dictionary, posting_file, lemmatzr):
+def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	
@@ -21,9 +14,8 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file, lemmatzr):
 		list[docId] 	A list of integers representing the doc Ids.
 	"""
 	print("Query: \"{}\" - ".format(query_string), end="")
-	words = query_string.split()
-	words = list(map(lambda word: lemmatize_word(word, lemmatzr), words))
-
+	words = word_tokenize(query_string)
+	
 	if len(words) == 1:  # Just handling an edge case
 		print("One words: {}".format(words[0]))
 		word_list_1 = get_word_list(words[0], dictionary, posting_file)

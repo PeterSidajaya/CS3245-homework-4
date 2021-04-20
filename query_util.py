@@ -80,13 +80,15 @@ def lemmatize_clauses(query_clauses, lemmatzr):
     lemmatized_clauses = []
     for and_clause in query_clauses:
         lemmatized_and_clause = []
-        
+
         # Iterate through each clause under the and clause
         for or_clause in and_clause:
             clause, clause_type = or_clause
             
             # Lemmatise word by word
-            lemmatized_words = " ".join(map(lambda x: lemmatzr.lemmatize(x).lower(), word_tokenize(clause)))
+            tokens = word_tokenize(clause)
+            lemmatized_tokens = list(map(lambda x: lemmatzr.lemmatize(x).lower(), tokens))
+            lemmatized_words = " ".join(lemmatized_tokens)
             lemmatized_and_clause.append((lemmatized_words, clause_type))
         
         lemmatized_clauses.append(lemmatized_and_clause)
