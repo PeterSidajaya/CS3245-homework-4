@@ -6,6 +6,7 @@ from phrasal_query import get_phrasal_query_doc_id
 from query_expansion import expand_clause
 from query_util import *
 from constants import *
+from query_prf import *
 
 def process_query(query_string, dictionary, posting_file):
     lemmatzr = WordNetLemmatizer()
@@ -47,6 +48,6 @@ def process_query(query_string, dictionary, posting_file):
 
     # Score and rank
     query_list = get_words_from_clauses(lemmatized_query_clauses)
-    final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
+    final_result = prf_search(query_list, dictionary, posting_file, combined_result)
 
     return " ".join(str(doc_id) for doc_id in final_result)

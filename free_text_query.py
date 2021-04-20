@@ -25,7 +25,7 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_r
 
     no_of_document = len(dictionary[DOCUMENT_LENGTH_KEYWORD])
 
-    # To get a faster quering, we precomute the value for tf_idf query vector
+    # To get a faster quering, we precompute the value for tf_idf query vector
     # Next time, we only need to do dot product with each of the given document 
     for term in query_keys:
         tf_idf_score = 0
