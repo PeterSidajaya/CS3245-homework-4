@@ -8,10 +8,6 @@ class QueryType(Enum):
     FREE_TEXT = 0
     PHRASAL = 1
 
-class BooleanOp(Enum):
-    AND = 0
-    OR = 1
-
 def categorise_query(query: str):
     """
     Output a list of clauses, where each element is a tuple
@@ -27,52 +23,44 @@ def categorise_query(query: str):
          Output: [('little puppy', <QueryType.PHRASAL>, <BooleanOp.AND>), ('chihuahua', <QueryType.FREE_TEXT>, <BooleanOp.OR>)]
     """
     if (len(query) < 1):
-      return
+        return
     
-    curr_str_idx = 0
+    and_clauses = re.split(AND_KEYWORD, query)
     query_clauses = []
-    is_last_keyword_quote = False
 
-    while curr_str_idx != -1 and curr_str_idx < len(query):
-        spliced_query = query[curr_str_idx:]
-        clause = ""
-        clause_type = None
-        closest_keyword_pos = 0
-        closest_keyword = ""
+    for i in range(len(and_clauses)):
+        processed_and_clause = []
+        and_clause = and_clauses[i]
+        curr_str_idx = 0
+        is_last_keyword_quote = False
 
-        if (is_last_keyword_quote):
-            # Find the next double quote
+        while curr_str_idx != -1 and curr_str_idx < len(and_clause):
+            spliced_query = and_clause[curr_str_idx:]
+            clause = ""
+            closest_keyword_pos = 0
+            
+            # Finding closest double quote
             closest_keyword_pos = spliced_query.find(DOUBLE_QUOTE_KEYWORD)
-            closest_keyword = DOUBLE_QUOTE_KEYWORD
+            
+            if (is_last_keyword_quote):
+                is_last_keyword_quote = False
+                clause_type = QueryType.PHRASAL
+            else:
+                is_last_keyword_quote = True
+                clause_type = QueryType.FREE_TEXT
 
-            is_last_keyword_quote = False
-            clause_type = QueryType.PHRASAL
-        
-        else:
-            # Finding closest query keyword
-            keywords_pos = list(map(lambda keyword: spliced_query.find(keyword), QUERY_KEYWORDS))
-            closest_keyword_idx = find_closest_idx(keywords_pos)
-            closest_keyword_pos = keywords_pos[closest_keyword_idx]
-            closest_keyword = QUERY_KEYWORDS[closest_keyword_idx]
+            # If there is no more keyword, we splice until the end of the string
+            next_idx = len(spliced_query) if closest_keyword_pos == -1 else closest_keyword_pos
+            clause = spliced_query[:next_idx].strip()
 
-            is_last_keyword_quote = closest_keyword == DOUBLE_QUOTE_KEYWORD
-            clause_type = QueryType.FREE_TEXT
-        
-        # If there is no more keyword, we splice until the end of the string
-        next_idx = len(spliced_query) if closest_keyword_pos == -1 else closest_keyword_pos
-        clause = spliced_query[:next_idx].strip()
+            if (len(clause) > 0):
+                processed_and_clause.append((clause, clause_type))
 
-        if (len(clause) > 0):
-            op_type = BooleanOp.AND if closest_keyword == AND_KEYWORD else BooleanOp.OR
-            query_clauses.append((clause, clause_type, BooleanOp.OR))
+            # Update position
+            curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(DOUBLE_QUOTE_KEYWORD)
 
-        # When we encounter AND, the previous clause is connected by AND
-        if (closest_keyword == AND_KEYWORD and len(query_clauses) > 0):
-            query_clauses[-1] = (query_clauses[-1][0], query_clauses[-1][1], BooleanOp.AND)
-
-        # Update position
-        curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(closest_keyword)
-
+        query_clauses.append(processed_and_clause)
+    
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
@@ -87,19 +75,16 @@ def union_document_ids(doc_list1, doc_list2):
 
     return list(set(doc_list[0]).union(*doc_list[1:]))
 
-############ HELPERS ############
+def lemmatize_clauses(query_clauses, lemmatzr):
+    lemmatized_clauses = []
+    for and_clause in query_clauses:
+        lemmatized_and_clause = list(map(lambda clause: (lemmatzr.lemmatize(clause[0]).lower(), clause[1]), and_clause))
+        lemmatized_clauses.append(lemmatized_and_clause)
+    return lemmatized_clauses
 
-def find_closest_idx(keywords_pos):
-    """
-    Given a list of integer, returns the smallest index that is above -1.
-    """
-    smallest_idx = math.inf
-    smallest_pos = math.inf
-
-    for idx, pos in enumerate(keywords_pos):
-        if pos > -1 and pos < smallest_pos:
-            smallest_idx = idx
-            smallest_pos = pos
-
-    smallest_idx = -1 if math.isinf(smallest_idx) else smallest_idx
-    return smallest_idx
+def get_words_from_clauses(query_clauses):
+    list_of_words = []
+    for and_clause in query_clauses:
+        and_clause_words = " ".join([clause_word for clause_word, clause_type in and_clause]).split(" ")
+        list_of_words.extend(and_clause_words)
+    return list_of_words
