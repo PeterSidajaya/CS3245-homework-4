@@ -1,4 +1,4 @@
-from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer, WordNetLemmatizer
 from collections import Counter
 
 from free_text_query import free_text_search
@@ -11,16 +11,17 @@ def process_query(query_string, dictionary, posting_file):
     """
     Perform search based on the query_string.
     """
+    stemmer = PorterStemmer()
     lemmatzr = WordNetLemmatizer()
 
     # Categorise query
     query_clauses = categorise_query(query_string)
     
-    # Lemmatise
-    lemmatized_query_clauses = lemmatize_clauses(query_clauses, lemmatzr)
+    # Stem
+    stemmed_query_clauses = stem_clauses(query_clauses, stemmer, lemmatzr)
 
     all_and_results = []
-    for and_clause in lemmatized_query_clauses:
+    for and_clause in stemmed_query_clauses:
         and_clause_result = []
 
         # Handle each clause in the and clause
@@ -51,7 +52,7 @@ def process_query(query_string, dictionary, posting_file):
         combined_result = intersect_document_ids(combined_result, and_clause_result)
 
     # Score and rank
-    query_list = get_words_from_clauses(lemmatized_query_clauses)
+    query_list = get_words_from_clauses(stemmed_query_clauses)
     final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
 
     return " ".join(str(doc_id) for doc_id in final_result)

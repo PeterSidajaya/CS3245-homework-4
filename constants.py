@@ -1,4 +1,10 @@
-### SCORING WEIGHT ###
+### CONFIG ###
+
+# Query processing
+USE_STEMMER = True
+USE_LEMMATIZER = False 
+
+# Result ranking
 PHRASAL_WEIGHT = 1.2
 PRIORITY_WEIGHT = 1.2
 
