@@ -2,6 +2,19 @@ from query_util import QueryType
 from constants import *
 
 def rank_document_ids(results_with_score, tagged_prio_list=None):
+    """
+    Rank document ids, given two lists:
+        1. results_with_score: the list of results with score but no tag
+        2. tagged_prio_list: the list of results with tags but no score
+    
+    Tag here refers to QueryType enum.
+
+    In this ranking process, score of the results that comes from phrasal search and
+    results that comes from tagged_prio_list will be multiplied with weight 
+    (defined in constants.py). 
+    """
+    print(tagged_prio_list)
+    
     # Default score will only be assigned to doc_ids in tagged_prio_list
     default_score = get_avg_score(results_with_score) * PRIORITY_WEIGHT
     # Default tag will only be assigned to doc_ids in results_with_score

@@ -65,10 +65,6 @@ def categorise_query(query: str):
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
-    # Early termination
-    if len(doc_list1) < 1 or len(doc_list2) < 1:
-        return []
-
     # TODO: See whether sorting step is necessary or not
     doc_list1.sort(key=lambda x: x[0])
     doc_list2.sort(key=lambda x: x[0])
@@ -94,12 +90,6 @@ def intersect_document_ids(doc_list1, doc_list2):
     return result
 
 def union_document_ids(doc_list1, doc_list2):
-    # Early termination
-    if len(doc_list1) < 1:
-        return doc_list2
-    elif len(doc_list2) < 1:
-        return doc_list1
-
     # TODO: See whether sorting step is necessary or not
     doc_list1.sort(key=lambda x: x[0])
     doc_list2.sort(key=lambda x: x[0])
@@ -119,12 +109,12 @@ def union_document_ids(doc_list1, doc_list2):
 
         # doc_list1[pointer] is smaller, advance the pointer
         elif doc_list1[idx0][0] < doc_list2[idx1][0]:
-            result.append(doc_list1[idx0][0])
+            result.append(doc_list1[idx0])
             idx0 += 1
 
         # doc_list2[pointer] is smaller, advance the pointer
         else: 
-            result.append(doc_list2[idx1][0])
+            result.append(doc_list2[idx1])
             idx1 += 1
     
     # List one has still elements 
