@@ -1,4 +1,5 @@
 from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk import word_tokenize
 from collections import Counter
 
 from free_text_query import free_text_search
@@ -37,7 +38,7 @@ def process_query(query_string, dictionary, posting_file):
                 # If we want to use clause expansion, use this
                 # clause_word = expand_clause(clause_word)
 
-                free_text_list = clause_word.split(" ")
+                free_text_list = word_tokenize(clause_word)
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
                 curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
 
