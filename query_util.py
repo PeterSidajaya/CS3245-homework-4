@@ -91,7 +91,6 @@ def intersect_document_ids(doc_list1, doc_list2):
         # doc_list2[pointer] is smaller, advance the pointer
         else: 
             idx1 += 1
-    print("INTERSECT between {} and {}\nRESULT {}".format(doc_list1, doc_list2, result))
     return result
 
 def union_document_ids(doc_list1, doc_list2):

@@ -60,7 +60,7 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
             tagged_score_dict[elem[0]] = (elem[1], default_tag)
 
     # Final output has the format of (doc_id, score, tag) 
-    return [(k, v[0], v[1]) for k, v in dict.items()]
+    return [(k, v[0], v[1]) for k, v in tagged_score_dict.items()]
 
 def get_avg_score(results_with_score):
     """
