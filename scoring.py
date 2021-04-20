@@ -13,8 +13,6 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     results that comes from tagged_prio_list will be multiplied with weight 
     (defined in constants.py). 
     """
-    print(tagged_prio_list)
-    
     # Default score will only be assigned to doc_ids in tagged_prio_list
     default_score = get_avg_score(results_with_score) * PRIORITY_WEIGHT
     # Default tag will only be assigned to doc_ids in results_with_score
