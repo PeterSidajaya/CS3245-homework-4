@@ -76,23 +76,29 @@ def union_document_ids(doc_list1, doc_list2):
 
     return list(set(doc_list[0]).union(*doc_list[1:]))
 
-def lemmatize_clauses(query_clauses, lemmatzr):
-    lemmatized_clauses = []
+def stem_clauses(query_clauses, stemmer, lemmtzr):
+    stemmed_clauses = []
     for and_clause in query_clauses:
-        lemmatized_and_clause = []
+        stemmed_and_clause = []
 
         # Iterate through each clause under the and clause
         for or_clause in and_clause:
             clause, clause_type = or_clause
             
-            # Lemmatise word by word
             tokens = word_tokenize(clause)
-            lemmatized_tokens = list(map(lambda x: lemmatzr.lemmatize(x).lower(), tokens))
-            lemmatized_words = " ".join(lemmatized_tokens)
-            lemmatized_and_clause.append((lemmatized_words, clause_type))
+
+            # Stem word by word
+            stemmed_tokens = tokens
+            if (USE_LEMMATIZER):
+                stemmed_tokens = list(map(lambda x: lemmtzr.lemmatize(x).lower(), stemmed_tokens))
+            if (USE_STEMMER):
+                stemmed_tokens = list(map(lambda x: stemmer.stem(x).lower(), stemmed_tokens))
+
+            stemmed_words = " ".join(stemmed_tokens)
+            stemmed_and_clause.append((stemmed_words, clause_type))
         
-        lemmatized_clauses.append(lemmatized_and_clause)
-    return lemmatized_clauses
+        stemmed_clauses.append(stemmed_and_clause)
+    return stemmed_clauses
 
 def get_words_from_clauses(query_clauses):
     list_of_words = []
