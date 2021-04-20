@@ -26,6 +26,7 @@ def process_query(query_string, dictionary, posting_file):
 
     # We only do search on phrasal queries first
     contains_phrasal_query = False
+    contains_free_text = False
     lemmatizer = WordNetLemmatizer()
 
     for query_clause in query_clauses:
@@ -36,13 +37,19 @@ def process_query(query_string, dictionary, posting_file):
         elif query_clause[1] == QueryType.FREE_TEXT:
             expanded_clause = expand_clause((query_clause[0], QueryType.FREE_TEXT), lemmatizer)
             query_list.extend(expanded_clause[0].split(" "))
+            contains_free_text = True
 
-    if contains_phrasal_query:
+    if contains_phrasal_query and contains_free_text:
         # Combine phrasal results
         phrasal_result_doc_id = intersect_document_ids(phrasal_results)
         final_result = free_text_search(query_list, dictionary, posting_file, phrasal_result_doc_id)
-    else:
+    elif contains_phrasal_query and (not contains_free_text):
+        phrasal_result_doc_id = intersect_document_ids(phrasal_results)
+        return " ".join(str(doc_id) for doc_id in phrasal_result_doc_id)
+    elif (not contains_phrasal_query) and contains_free_text:
         final_result = free_text_search(query_list, dictionary, posting_file, None)
+    else:
+        final_result = ""
 
     return final_result
 
