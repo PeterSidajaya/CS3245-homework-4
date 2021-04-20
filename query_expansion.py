@@ -10,16 +10,11 @@ from constants import *
 # https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
 # https://www.nltk.org/howto/wordnet.html#similarityery
 
-def expand_clause(clause: (str, QueryType)):
+def expand_clause(expression: str):
     """
-    Apply expansion technique to the given clause.
+    Apply expansion technique to the given expression.
     """
-    # We dont expand phrasal clause
-    if (clause[1] == QueryType.PHRASAL):
-        return
-
     # Tokenise and get all possible synonyms
-    expression = clause[0]    
     token_list = word_tokenize(expression)
     synsets_token = get_synsets(token_list)   
 
@@ -37,7 +32,7 @@ def expand_clause(clause: (str, QueryType)):
         expanded_token = ' '.join(synonym_names)
         expanded_tokens.append(expanded_token)
     
-    return (' '.join(expanded_tokens), clause[1])
+    return ' '.join(expanded_tokens)
 
 ############ HELPERS ############
 
