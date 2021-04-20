@@ -36,7 +36,6 @@ def prf_search(query_list, dictionary, posting_file, accepted_doc_id, stemmer, l
     query_term_vector = []
 
     no_of_document = len(dictionary[DOCUMENT_LENGTH_KEYWORD])
-    doc_matrix = []
 
     # To get a faster quering, we precompute the value for tf_idf query vector
     # Next time, we only need to do dot product with each of the given document 
@@ -66,27 +65,18 @@ def prf_search(query_list, dictionary, posting_file, accepted_doc_id, stemmer, l
 
     # =======
     # Extend the query vector with words in the best docs.
-    # This is tentative, we can just remove this and search in the titles.
-    # Commenting this chunk out does not harm anything.
-    print("Original query keys:", query_keys)
     extend_lists_as_much_as_possible(query_term_vector, query_keys, 
                                      set_of_best_doc_ids, PRF_TIME_LIMIT, dictionary, posting_file)
-    
-    print("Extended query keys:", query_keys)
+    # Alternative is to extend with titles, but the titles are actually useless from our experiments
+    # extend_query_by_title(query_term_vector, query_keys, set_of_best_doc_ids, 
+    #                       dictionary, posting_file, stemmer, lemmatzr)
     doc_matrix = get_tf_idf(set_of_best_doc_ids, query_keys, dictionary, posting_file)
     new_query_vec = get_mean_vector(doc_matrix, len(query_keys))
     new_query_vec = weighted_average(query_term_vector, PRF_QUERY_VEC_WEIGHT, 
                                      new_query_vec, PRF_QUERY_VEC_UPDATE_WEIGHT)
-    # ====== OR
-    # # Create a new query vector based on the best docs' vectors
-    # new_query_vec = get_mean_vector(best_docs, len(query_term_vector))
-    # new_query_vec = weighted_average(query_term_vector, PRF_QUERY_VEC_WEIGHT, 
-    #                                  new_query_vec, PRF_QUERY_VEC_UPDATE_WEIGHT)
-    # ======
+
     # Retrieve the best documents with tf-idf based on this modified query vector
-    print("Original result:", list(map(lambda x: x[1], ranking_list[:15])))
     ranking_list = get_results_for_vector(new_query_vec, query_keys, dictionary, posting_file)
-    print("New result:", list(map(lambda x: x[1], ranking_list[:15])))
 
     if (accepted_doc_id == None):
         tf_idf_doc_list = [y for x, y, z in ranking_list]
@@ -95,7 +85,7 @@ def prf_search(query_list, dictionary, posting_file, accepted_doc_id, stemmer, l
         
     return tf_idf_doc_list
 
-def extend_lists_as_much_as_possible(original_query_term_vector, query_keys, valid_doc_ids, time_limit, dictionary, posting_file):
+def extend_query_by_title(original_query_term_vector, query_keys, valid_doc_ids, dictionary, 
     posting_file, stemmer, lemmatzr):
     """Extend query_keys by words in the titles of valid_doc_ids.
 
@@ -113,6 +103,29 @@ def extend_lists_as_much_as_possible(original_query_term_vector, query_keys, val
         stemmer: Stemmer to use on title
         lemmatzr: Lemmatizer to use on title
     """
+    present_keys = set(query_keys)
+    for doc_id in valid_doc_ids:
+        # Get the document's title and tokenize it
+        title = dictionary[TITLE_KEYWORD][doc_id] 
+        tokens = word_tokenize(title)
+        # Stem word by word
+        stemmed_tokens = []
+        if (USE_LEMMATIZER):
+            stemmed_tokens = list(map(lambda x: lemmtzr.lemmatize(x).lower(), tokens))
+        if (USE_STEMMER):
+            stemmed_tokens = list(map(lambda x: stemmer.stem(x).lower(), tokens))
+
+        # Add all tokens in the title that were not already added, to the query vector
+        for token in stemmed_tokens:
+            if token not in present_keys and token in dictionary:
+                # Prevent double adding words to the query vector
+                present_keys.add(token)
+                # Add it to the query vector. 
+                # The query vector value is 0 because it was not in the actual query
+                original_query_term_vector.append(0) 
+                query_keys.append(token)
+
+def extend_query_as_much_as_possible(original_query_term_vector, query_keys, valid_doc_ids, time_limit, dictionary, posting_file):
     """Extend query_keys by random words in valid_doc_ids.
 
     This function will extend the original_query_term_vector with the same number of 0's as words
@@ -139,6 +152,9 @@ def extend_lists_as_much_as_possible(original_query_term_vector, query_keys, val
     # while total_time < time_limit and num_checked < no_of_words and len(query_keys) < 20:
     while total_time < time_limit and num_checked < no_of_words: # and len(query_keys) < 20:
         term = random.choice(possible_words)
+        if term == DOCUMENT_LENGTH_KEYWORD or term == TITLE_KEYWORD:
+            num_checked += 1
+            continue
         docs = get_word_list(term, dictionary, posting_file)
         for (doc_id, _, _) in docs:
             if doc_id in valid_doc_ids:
@@ -222,15 +238,13 @@ def get_tf_idf(valid_doc_ids, query_keys, dictionary, posting_file):
             tf_score = 1 + math.log(term_freq, 10)  # tf
             document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
     
-    # calculate cosine score
+    # Create the document vectors
     for doc_id in valid_doc_ids:
         document_term_vector = []
         doc_vec = []
-
-        # calculate cosine score
+        # Do it in order of the query_keys
         for i in range(len(query_keys)):
             term = query_keys[i]
-
             if (term not in document_term_dict or doc_id not in document_term_dict[term]):
                 doc_vec.append(0)
             else:

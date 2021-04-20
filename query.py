@@ -49,6 +49,9 @@ def process_query(query_string, dictionary, posting_file):
 
     # Score and rank
     query_list = get_words_from_clauses(stemmed_query_clauses)
-    final_result = prf_search(query_list, dictionary, posting_file, combined_result)
+    if USE_PRF:
+        final_result = prf_search(query_list, dictionary, posting_file, combined_result, stemmer, lemmatzr)
+    else:
+        final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True) 
 
     return " ".join(str(doc_id) for doc_id in final_result)
