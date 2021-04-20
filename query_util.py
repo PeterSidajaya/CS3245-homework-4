@@ -74,3 +74,17 @@ def union_document_ids(doc_list1, doc_list2):
     doc_list = [doc_list1, doc_list2]
 
     return list(set(doc_list[0]).union(*doc_list[1:]))
+
+def lemmatize_clauses(query_clauses, lemmatzr):
+    lemmatized_clauses = []
+    for and_clause in query_clauses:
+        lemmatized_and_clause = list(map(lambda clause: (lemmatzr.lemmatize(clause[0]).lower(), clause[1]), and_clause))
+        lemmatized_clauses.append(lemmatized_and_clause)
+    return lemmatized_clauses
+
+def get_words_from_clauses(query_clauses):
+    list_of_words = []
+    for and_clause in query_clauses:
+        and_clause_words = " ".join([clause_word for clause_word, clause_type in and_clause]).split(" ")
+        list_of_words.extend(and_clause_words)
+    return list_of_words
