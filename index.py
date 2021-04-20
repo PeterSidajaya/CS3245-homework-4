@@ -80,7 +80,7 @@ def build_index(doc_id, out_dict, out_postings):
             # This line is if you want to do lemmatization instead
             token_list = list(map(lambda x: lemmatizer.lemmatize(x.lower()), filtered_list))
 
-            multiple_doc_list.append((int(doc_id), token_list))
+            multiple_doc_list.append((int(doc_id), title, token_list))
             files_in_block += 1
 
             # If the number of files scanned has reach block size, then invert first
