@@ -3,9 +3,11 @@ from collections import Counter
 from index_helper import get_word_list
 from free_text_query import normalize_list
 
+import time
 import heapq
 import math
 import pickle
+import random
 
 def prf_search(query_list, dictionary, posting_file, accepted_doc_id):
     """rank the list of document based on the query given, using prf
@@ -47,14 +49,36 @@ def prf_search(query_list, dictionary, posting_file, accepted_doc_id):
         # final precompute query vector
         query_term_vector = normalize_list(query_term_vector, normalize_denominator)
 
+    # Retrieve the best documents with tf-idf based on this query vector
     ranking_list = get_results_for_vector(query_term_vector, query_keys, dictionary, posting_file)
 
+    # These are the best docs that we will assume are relevant for PRF
     best_docs = ranking_list[:PRF_NUM_OF_RESULTS]
-    new_query_vec = get_mean_vector(best_docs, len(query_term_vector))
+    set_of_best_doc_ids = set(map(lambda x: x[1], best_docs))
+
+    # =======
+    # Extend the query vector with words in the best docs.
+    # This is tentative, we can just remove this and search in the titles.
+    # Commenting this chunk out does not harm anything.
+    print("Original query keys:", query_keys)
+    extend_lists_as_much_as_possible(query_term_vector, query_keys, 
+                                     set_of_best_doc_ids, PRF_TIME_LIMIT, dictionary, posting_file)
+    
+    print("Extended query keys:", query_keys)
+    doc_matrix = get_tf_idf(set_of_best_doc_ids, query_keys, dictionary, posting_file)
+    new_query_vec = get_mean_vector(doc_matrix, len(query_keys))
     new_query_vec = weighted_average(query_term_vector, PRF_QUERY_VEC_WEIGHT, 
                                      new_query_vec, PRF_QUERY_VEC_UPDATE_WEIGHT)
-    print(best_docs)
-    print("Vector:",new_query_vec)
+    # ====== OR
+    # # Create a new query vector based on the best docs' vectors
+    # new_query_vec = get_mean_vector(best_docs, len(query_term_vector))
+    # new_query_vec = weighted_average(query_term_vector, PRF_QUERY_VEC_WEIGHT, 
+    #                                  new_query_vec, PRF_QUERY_VEC_UPDATE_WEIGHT)
+    # ======
+    # Retrieve the best documents with tf-idf based on this modified query vector
+    print("Original result:", list(map(lambda x: x[1], ranking_list[:15])))
+    ranking_list = get_results_for_vector(new_query_vec, query_keys, dictionary, posting_file)
+    print("New result:", list(map(lambda x: x[1], ranking_list[:15])))
 
     if (accepted_doc_id == None):
         tf_idf_doc_list = [y for x, y, z in ranking_list]
@@ -62,6 +86,30 @@ def prf_search(query_list, dictionary, posting_file, accepted_doc_id):
         tf_idf_doc_list = [y for x, y, z in ranking_list if y in accepted_doc_id]
         
     return tf_idf_doc_list
+
+def extend_lists_as_much_as_possible(original_query_term_vector, query_keys, valid_doc_ids, time_limit, dictionary, posting_file):
+    prev_time = time.perf_counter()
+    total_time = 0
+    no_of_words = len(dictionary)
+
+    possible_words = list(dictionary.keys())
+    num_checked = len(query_keys)
+    # To add a hard limit for query vector size, uncomment this line instead
+    # while total_time < time_limit and num_checked < no_of_words and len(query_keys) < 20:
+    while total_time < time_limit and num_checked < no_of_words: # and len(query_keys) < 20:
+        term = random.choice(possible_words)
+        docs = get_word_list(term, dictionary, posting_file)
+        for (doc_id, _, _) in docs:
+            if doc_id in valid_doc_ids:
+                original_query_term_vector.append(0)
+                query_keys.append(term)
+                break
+
+        # Update timer
+        curr_time = time.perf_counter()
+        total_time += curr_time - prev_time
+        prev_time = curr_time
+        num_checked += 1
 
 def get_mean_vector(best_docs, num_words):
     new_query_vec = []
@@ -78,6 +126,45 @@ def weighted_average(vector_1, weight_1, vector_2, weight_2):
     for i in range(len(vector_1)):
         result_vec.append(vector_1[i] * weight_1 + vector_2[i] * weight_2)
     return result_vec
+
+def get_tf_idf(valid_doc_ids, query_keys, dictionary, posting_file):
+    """Returns a document matrix, similar to get_results_for_vector but for valid doc ids.
+    No dot product is done.
+    """
+    # dictionary["LENGTH"] is the normalize denominator for a particular document_id which precomputed in index stage
+    tf_idf_list = []
+    document_term_dict = {}
+
+    # initialize the dictionary
+    for term in query_keys:
+        document_term_dict[term] = {}
+
+    # calculate tf_score for each term (if it exists in the dictionary)
+    for term in query_keys:
+        tf_score = 0
+        posting_list = get_word_list(term, dictionary, posting_file)
+        
+        for (doc_id, term_freq, _) in posting_list:
+            tf_score = 1 + math.log(term_freq, 10)  # tf
+            document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
+    
+    # calculate cosine score
+    for doc_id in valid_doc_ids:
+        document_term_vector = []
+        doc_vec = []
+
+        # calculate cosine score
+        for i in range(len(query_keys)):
+            term = query_keys[i]
+
+            if (term not in document_term_dict or doc_id not in document_term_dict[term]):
+                doc_vec.append(0)
+            else:
+                doc_vec.append(document_term_dict[term][doc_id])
+        # We just need to make sure that doc_vec is in index 2 for backwards compatibility
+        tf_idf_list.append((0, doc_id, doc_vec))
+
+    return tf_idf_list
 
 def get_results_for_vector(query_term_vector, query_keys, dictionary, posting_file):
     # dictionary["LENGTH"] is the normalize denominator for a particular document_id which precomputed in index stage
@@ -120,45 +207,3 @@ def get_results_for_vector(query_term_vector, query_keys, dictionary, posting_fi
 
     ranking_list.sort(key=lambda x: x[0], reverse=True)
     return ranking_list
-
-def get_prf_clause(results):
-    """
-    Apply Pseudo Relevance Feedback(PRF) technique. PRF requires
-    the query to be run at least once to get initial set of results.
-    """
-    # We only care about the top results
-    top_results = results[:PRF_NUM_OF_RESULTS]
-
-    # Look at the results document vector, and extract the impt words
-    doc_vecs = list(map(lambda x: get_doc_vec(x), top_results))
-    impt_words = map(lambda x: extract_k_impt_words(x, PRF_NUM_OF_WORDS_PER_DOC), doc_vecs)
-
-    return ' '.join(impt_words)
-
-############ HELPERS ############
-
-def extract_k_impt_words(doc_vecs, k: int):
-    """
-    Extract k important words from the document vector. Important words
-    are words with the highest tf-idf score within the document vector.
-    """
-    # Get the index of top tf-idf score
-    heapq.heapify(doc_vecs)
-    impt_words_index = heapq.nlargest(2, enumerate(doc_vecs), key=lambda x: x[1])
-
-    # Convert the indices back to word
-    return list(map(lambda x: get_word(x), impt_words_index))
-
-def get_doc_vec(doc_id):
-    """
-    Get document vector based on its document-id
-    """
-    # Stubs
-    return []
-
-def get_word(doc_vec_id):
-    """
-    Get word based on the id of the document vector
-    """
-    # Stubs
-    return ""
