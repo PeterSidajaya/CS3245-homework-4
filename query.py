@@ -8,6 +8,9 @@ from query_util import *
 from constants import *
 
 def process_query(query_string, dictionary, posting_file):
+    """
+    Perform search based on the query_string.
+    """
     lemmatzr = WordNetLemmatizer()
 
     # Categorise query
@@ -54,4 +57,7 @@ def process_query(query_string, dictionary, posting_file):
     return " ".join(str(doc_id) for doc_id in final_result)
 
 def tag_results(results, tag):
+    """
+    Returns a list of results where each element is (result, tag).
+    """
     return list(map(lambda x: (x, tag), results))
