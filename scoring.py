@@ -29,9 +29,13 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
             score *= PHRASAL_WEIGHT
         weighted_list.append((doc_id, score))
 
+    # Weed out weaker results
+    weighted_avg_score = get_avg_score(weighted_list)
+    weighted_list = list(filter(lambda x: x[1] > weighted_avg_score, weighted_list))
+
     # Sort
     weighted_list.sort(key=lambda x: x[1], reverse=True)
-    return weighted_list
+    return weighted_list[:NUM_OF_RESULTS]
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
     """
@@ -76,6 +80,7 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
 def get_avg_score(results_with_score):
     """
     Get the average score of the results.
+    ASsumes that the format of each element is (doc_id, score)
     """
     score_sum = 0
     for res in results_with_score:
