@@ -85,4 +85,8 @@ def get_avg_score(results_with_score):
     score_sum = 0
     for res in results_with_score:
         score_sum += res[1]
-    return score_sum / len(results_with_score)
+
+    if len(results_with_score) > 0:
+        return score_sum / len(results_with_score)
+    else:
+        return 0
