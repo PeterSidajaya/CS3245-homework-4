@@ -30,9 +30,9 @@ def process_query(query_string, dictionary, posting_file):
                 curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
             elif clause_type == QueryType.FREE_TEXT:
                 # If we want to use clause expansion, use this
-                # clause_word = expand_clause(query_clause)
+                expanded_clause = expand_clause(or_clause)
 
-                free_text_list = clause_word.split(" ")
+                free_text_list = expanded_clause[0].split(" ")
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
 
             # Combine with the existing results
