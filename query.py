@@ -36,7 +36,7 @@ def process_query(query_string, dictionary, posting_file):
                 curr_result = tag_results(curr_result, QueryType.PHRASAL)
             elif clause_type == QueryType.FREE_TEXT:
                 # If we want to use clause expansion, use this
-                # clause_word = expand_clause(clause_word)
+                clause_word = expand_clause(clause_word)
 
                 free_text_list = word_tokenize(clause_word)
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
