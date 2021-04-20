@@ -2,15 +2,14 @@ from index_helper import get_word_list
 from constants import DOC_ID, POS_LIST
 import nltk
 
-def stem_word(word):
+def lemmatize_word(word, lemmatzr):
 	"""
 	Stemming stub - should perform case folding then stemming.
 	"""
-	stemmer = nltk.PorterStemmer()
-	return stemmer.stem(word.lower())
+	return lemmatzr.lemmatize(word.lower())
 
 
-def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
+def get_phrasal_query_doc_id(query_string, dictionary, posting_file, lemmatzr):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	
@@ -23,7 +22,7 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	"""
 	print("Query: \"{}\" - ".format(query_string), end="")
 	words = query_string.split()
-	words = list(map(lambda word: stem_word(word), words))
+	words = list(map(lambda word: lemmatize_word(word, lemmatzr), words))
 
 	if len(words) == 1:  # Just handling an edge case
 		print("One words: {}".format(words[0]))
