@@ -1,11 +1,12 @@
 from constants import *
 from collections import Counter
 from index_helper import get_word_list
+from scoring import rank_document_ids
 
 import math
 import pickle
 
-def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_ranking=True):
+def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_ranking=True):
     """rank the list of document based on the query given
 
     Args:
@@ -80,17 +81,12 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_r
         # final cosine score for ranking
         score = sum(score)
 
-        ranking_list.append((score, doc_id))
+        ranking_list.append((doc_id, score))
 
     if (do_ranking):
-        ranking_list.sort(key=lambda x: x[0], reverse=True)
+        ranking_list = rank_document_ids(ranking_list, tagged_prio_list)
 
-    if (accepted_doc_id == None):
-        tf_idf_doc_list = [y for x, y in ranking_list]
-    else:
-        tf_idf_doc_list = [y for x, y in ranking_list if y in accepted_doc_id]
-        
-    return tf_idf_doc_list
+    return [x for x, y in ranking_list]
 
 
 def normalize_list(lst, denominator):
