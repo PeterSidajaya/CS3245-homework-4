@@ -27,7 +27,7 @@ def process_query(query_string, dictionary, posting_file):
 
             # Get result for the current clause
             if clause_type == QueryType.PHRASAL:
-                curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file, lemmatzr)
+                curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
             elif clause_type == QueryType.FREE_TEXT:
                 # If we want to use clause expansion, use this
                 # clause_word = expand_clause(query_clause)

@@ -1,5 +1,6 @@
 from enum import Enum
 from constants import *
+from nltk import word_tokenize
 
 import re
 import math
@@ -78,7 +79,18 @@ def union_document_ids(doc_list1, doc_list2):
 def lemmatize_clauses(query_clauses, lemmatzr):
     lemmatized_clauses = []
     for and_clause in query_clauses:
-        lemmatized_and_clause = list(map(lambda clause: (lemmatzr.lemmatize(clause[0]).lower(), clause[1]), and_clause))
+        lemmatized_and_clause = []
+
+        # Iterate through each clause under the and clause
+        for or_clause in and_clause:
+            clause, clause_type = or_clause
+            
+            # Lemmatise word by word
+            tokens = word_tokenize(clause)
+            lemmatized_tokens = list(map(lambda x: lemmatzr.lemmatize(x).lower(), tokens))
+            lemmatized_words = " ".join(lemmatized_tokens)
+            lemmatized_and_clause.append((lemmatized_words, clause_type))
+        
         lemmatized_clauses.append(lemmatized_and_clause)
     return lemmatized_clauses
 
