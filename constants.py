@@ -13,7 +13,7 @@ FILTER_STRENGTH = 1.3  # the smaller it is, the more forgiving is the filter (th
 ### INDEX ###
 DOCUMENT_LENGTH_KEYWORD = "LENGTH"
 IMPT_KEYWORD = "IMPORTANT"
-SPIMI_BLOCK_SIZE = 100
+SPIMI_BLOCK_SIZE = 1000
 POSTING_DIR = "temp_postings_result_dir/"
 
 ### QUERY KEYWORD ###

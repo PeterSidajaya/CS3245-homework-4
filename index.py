@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from constants import *
+from collections import Counter
 from spimi import invert, merge_files
 from index_helper import sanitise
 
@@ -13,7 +14,6 @@ import string
 import csv
 import shutil
 import math
-from collections import Counter
 
 def usage():
     print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
@@ -29,7 +29,7 @@ def build_index(doc_id, out_dict, out_postings):
     dictionary = {}
 
     # # For testing purposes
-    limit = 1000
+    # limit = 100
 
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}
@@ -66,8 +66,8 @@ def build_index(doc_id, out_dict, out_postings):
                 continue
 
             # # End if limit is reached, for testing purposes
-            if idx == limit:
-                break
+            # if idx == limit:
+            #     break
 
             doc_id, title, content, date_posted, court = row
 
