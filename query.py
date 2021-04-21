@@ -56,10 +56,9 @@ def process_query(query_string, dictionary, posting_file):
         combined_result = intersect_document_ids(combined_result, and_clause_result)
 
     query_list = get_words_from_clauses(stemmed_query_clauses)
-    print(query_list, expanded_words)
     query_list.extend(expanded_words)
     query_list = list(set(query_list))
-    print(query_list)
+
     # Score and rank
     final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
 
