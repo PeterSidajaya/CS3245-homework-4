@@ -15,6 +15,7 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     results that comes from tagged_prio_list will be multiplied with weight 
     (defined in constants.py). 
     """
+    # Weed out the weakest results, extreme low score lowers the overall benchmark
     initial_benchmark = get_avg_score(results_with_score) * FILTER_STRENGTH
     filtered_score_list = list(filter(lambda x: x[1] > initial_benchmark, results_with_score))
 
