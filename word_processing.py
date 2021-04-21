@@ -1,0 +1,81 @@
+from nltk.corpus import wordnet as wn
+from collections import defaultdict
+from constants import *
+from nltk.corpus import stopwords
+
+import nltk
+import regex
+
+nltk.download('stopwords')
+
+lemmatizer = nltk.stem.WordNetLemmatizer()
+stemmer = nltk.stem.PorterStemmer()
+tag_map = defaultdict(lambda : wn.NOUN)
+tag_map['J'] = wn.ADJ
+tag_map['V'] = wn.VERB
+tag_map['R'] = wn.ADV
+
+def lemmatize(token_list):
+    """lemmatize every token in a given list of tokens
+    """
+    return [lemmatizer.lemmatize(token.lower(), tag_map[tag[0]]) for token, tag in nltk.pos_tag(token_list)]
+
+def stem(token_list):
+    """stem every token in a given list of tokens
+    """
+    return [stemmer.stem(token.lower()) for token in token_list]
+
+def lemmatize_and_stem(token_list):
+    """combine both of the functions above. idk, in case this is faster
+    """
+    return [stemmer.stem(lemmatizer.lemmatize(token.lower(), tag_map[tag[0]])) for token, tag in nltk.pos_tag(token_list)]
+
+def sanitise(long_string):
+    """Tokenize the a string text into a list of tokens and remove any non-alphanumeric characters and stop words, except for
+    currency characters and numbers with punctuation (100,000.00). Use as a substitute for word_tokenize().
+
+    Args:
+        long_string (str): the text
+
+    Returns:
+        list: list of filtered tokens
+    """
+    # Tokenize
+    word_list = nltk.tokenize.word_tokenize(long_string)
+    
+    # Remove non-alphanumeric characters
+    sanitised_list = [sanitise_word(string) for string in word_list]
+    second_tokenization_list = [nltk.tokenize.word_tokenize(string) for string in sanitised_list]
+    flattened_list = [token for token_list in second_tokenization_list for token in token_list]
+    
+    # Remove stop words
+    removed_list = [token for token in flattened_list if token not in stopwords.words('english')]
+    
+    # Apply stemming and/or lemmatization
+    token_list = removed_list
+    if (USE_LEMMATIZER and USE_STEMMER):
+            token_list = lemmatize_and_stem(token_list)
+    else:
+        # This line is if you want to do lemmatization (prefer to do this before stemming, as stemming might not return a real word)
+        if (USE_LEMMATIZER):
+            token_list = lemmatize(token_list)
+            
+        # This line is if you want to do stemming after or instead
+        if (USE_STEMMER):
+            token_list = stem(token_list)
+    
+    return token_list
+    
+
+def sanitise_word(string):
+    if not is_numeric(string):
+        return regex.sub(r'[^a-zA-Z0-9\_\-\p{Sc}]', ' ', string)
+    else:
+        return string
+
+
+def is_numeric(string):
+    if regex.match(r'[0-9]+[^0-9][0-9]+', string):
+        return True
+    else:
+        return False
