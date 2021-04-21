@@ -35,8 +35,8 @@ def prf_search(ranked_list, query_keys, query_term_vector, dictionary, posting_f
 
     # =======
     # Extend the query vector with words in the best docs.
-    extend_query_as_much_as_possible(query_term_vector, query_keys,
-                                     set_of_best_doc_ids, PRF_TIME_LIMIT, dictionary, posting_file)
+    extend_query_with_impt_words(query_term_vector, query_keys,
+                                     set_of_best_doc_ids, dictionary)
 
     # Alternative is to extend with titles, but the titles are actually useless from our experiments
     # extend_query_by_title(query_term_vector, query_keys, set_of_best_doc_ids,
