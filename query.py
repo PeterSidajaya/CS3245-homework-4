@@ -22,6 +22,7 @@ def process_query(query_string, dictionary, posting_file):
     stemmed_query_clauses = stem_clauses(query_clauses, stemmer, lemmatzr)
 
     all_and_results = []
+    expanded_words = []
     for and_clause in stemmed_query_clauses:
         and_clause_result = []
 
@@ -39,6 +40,8 @@ def process_query(query_string, dictionary, posting_file):
                 clause_word = expand_clause(clause_word)
 
                 free_text_list = word_tokenize(clause_word)
+                expanded_words.extend(free_text_list)
+
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
                 curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
 
@@ -52,8 +55,12 @@ def process_query(query_string, dictionary, posting_file):
     for and_clause_result in all_and_results:
         combined_result = intersect_document_ids(combined_result, and_clause_result)
 
-    # Score and rank
     query_list = get_words_from_clauses(stemmed_query_clauses)
+    print(query_list, expanded_words)
+    query_list.extend(expanded_words)
+    query_list = list(set(query_list))
+    print(query_list)
+    # Score and rank
     final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
 
     return " ".join(str(doc_id) for doc_id in final_result)
