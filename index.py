@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from constants import *
 from spimi import invert, merge_files
-from index_helper import sanitise
+from word_processing import lemmatize, stem, sanitise
 
 import re
 import nltk
@@ -74,13 +74,14 @@ def build_index(doc_id, out_dict, out_postings):
 
             filtered_list = sanitise(content)
             token_list = filtered_list
-            # This line is if you want to do stemming
-            if (USE_STEMMER):
-                token_list = list(map(lambda x: stemmer.stem(x.lower()), filtered_list))
-
-            # This line is if you want to do lemmatization instead
+            
+            # This line is if you want to do lemmatization (prefer to do this before stemming, as stemming might not return a real word)
             if (USE_LEMMATIZER):
-                token_list = list(map(lambda x: lemmatizer.lemmatize(x.lower()), filtered_list))
+                token_list = lemmatize(token_list)
+                
+            # This line is if you want to do stemming after or instead
+            if (USE_STEMMER):
+                token_list = stem(token_list)
 
             multiple_doc_list.append((int(doc_id), token_list))
             files_in_block += 1

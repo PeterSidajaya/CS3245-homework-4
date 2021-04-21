@@ -44,24 +44,3 @@ def get_word_list(term, dictionary, posting_file):
     posting_file.seek(pointer)
     posting_list = pickle.load(posting_file)
     return posting_list
-
-
-def sanitise(long_string):
-    word_list = nltk.tokenize.word_tokenize(long_string)
-    sanitised_list = [sanitise_word(string) for string in word_list]
-    second_tokenization_list = [nltk.tokenize.word_tokenize(string) for string in sanitised_list]
-    return [token for token_list in second_tokenization_list for token in token_list]
-    
-
-def sanitise_word(string):
-    if not is_numeric(string):
-        return regex.sub(r'[^a-zA-Z0-9\_\-\p{Sc}]', ' ', string)
-    else:
-        return string
-
-
-def is_numeric(string):
-    if regex.match(r'[0-9]+[^0-9][0-9]+', string):
-        return True
-    else:
-        return False

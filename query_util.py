@@ -1,6 +1,7 @@
 from enum import Enum
 from constants import *
 from nltk import word_tokenize
+from word_processing import lemmatize, stem, sanitise
 
 import re
 import math
@@ -85,14 +86,17 @@ def stem_clauses(query_clauses, stemmer, lemmtzr):
         for or_clause in and_clause:
             clause, clause_type = or_clause
             
-            tokens = word_tokenize(clause)
+            # Use the same method as in indexing
+            tokens = sanitise(clause)
 
             # Stem word by word
             stemmed_tokens = tokens
+            
+            # Do lemmatization before stemming
             if (USE_LEMMATIZER):
-                stemmed_tokens = list(map(lambda x: lemmtzr.lemmatize(x).lower(), stemmed_tokens))
+                stemmed_tokens = lemmatize(stemmed_tokens)
             if (USE_STEMMER):
-                stemmed_tokens = list(map(lambda x: stemmer.stem(x).lower(), stemmed_tokens))
+                stemmed_tokens = stem(stemmed_tokens)
 
             stemmed_words = " ".join(stemmed_tokens)
             stemmed_and_clause.append((stemmed_words, clause_type))
