@@ -1,7 +1,14 @@
 ### CONFIG ###
+
+# Query processing
 USE_STEMMER = True
 USE_LEMMATIZER = False 
 USE_PRF = True
+
+# Result ranking
+PHRASAL_WEIGHT = 1.7    # the higher it is, the more weight phrasal results has
+PRIORITY_WEIGHT = 1.1   # the higher it is, the more weight initial results has
+FILTER_STRENGTH = 1.3  # the smaller it is, the more forgiving is the filter (thus more results)
 
 ### INDEX ###
 DOCUMENT_LENGTH_KEYWORD = "LENGTH"

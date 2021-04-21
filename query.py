@@ -1,4 +1,5 @@
 from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk import word_tokenize
 from collections import Counter
 
 from free_text_query import free_text_search
@@ -9,6 +10,9 @@ from constants import *
 from query_prf import *
 
 def process_query(query_string, dictionary, posting_file):
+    """
+    Perform search based on the query_string.
+    """
     stemmer = PorterStemmer()
     lemmatzr = WordNetLemmatizer()
 
@@ -19,6 +23,7 @@ def process_query(query_string, dictionary, posting_file):
     stemmed_query_clauses = stem_clauses(query_clauses, stemmer, lemmatzr)
 
     all_and_results = []
+    expanded_words = []
     for and_clause in stemmed_query_clauses:
         and_clause_result = []
 
@@ -30,13 +35,17 @@ def process_query(query_string, dictionary, posting_file):
             # Get result for the current clause
             if clause_type == QueryType.PHRASAL:
                 curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
+                curr_result = tag_results(curr_result, QueryType.PHRASAL)
             elif clause_type == QueryType.FREE_TEXT:
                 # If we want to use clause expansion, use this
-                # clause_word = expand_clause(query_clause)
+                clause_word = expand_clause(clause_word)
 
-                free_text_list = clause_word.split(" ")
+                free_text_list = word_tokenize(clause_word)
+                expanded_words.extend(free_text_list)
+
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
-  
+                curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
+
             # Combine with the existing results
             and_clause_result = union_document_ids(and_clause_result, curr_result)
 
@@ -47,11 +56,22 @@ def process_query(query_string, dictionary, posting_file):
     for and_clause_result in all_and_results:
         combined_result = intersect_document_ids(combined_result, and_clause_result)
 
-    # Score and rank
     query_list = get_words_from_clauses(stemmed_query_clauses)
+    query_list.extend(expanded_words)
+    query_list = list(set(query_list))
+
+    # Score and rank
     if USE_PRF:
         final_result = prf_search(query_list, dictionary, posting_file, combined_result, stemmer, lemmatzr)
     else:
         final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True) 
 
+
+
     return " ".join(str(doc_id) for doc_id in final_result)
+
+def tag_results(results, tag):
+    """
+    Returns a list of results where each element is (result, tag).
+    """
+    return list(map(lambda x: (x, tag), results))

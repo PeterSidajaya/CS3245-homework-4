@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from constants import *
 from spimi import invert, merge_files
+from index_helper import sanitise
 
 import re
 import nltk
@@ -71,9 +72,7 @@ def build_index(doc_id, out_dict, out_postings):
 
             doc_id, title, content, date_posted, court = row
 
-            word_list = nltk.tokenize.word_tokenize(content)
-            filtered_list = [text for text in word_list if text not in string.punctuation]
-
+            filtered_list = sanitise(content)
             token_list = filtered_list
             # This line is if you want to do stemming
             if (USE_STEMMER):
