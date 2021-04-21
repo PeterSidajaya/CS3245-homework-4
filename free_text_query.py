@@ -8,14 +8,20 @@ import math
 import pickle
 
 def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_ranking=True):
-    """rank the list of document based on the query given
+    """rank the list of document based on the query given.
+
+    query_list is the list of sanitized tokens in the input query clause. We compute a query
+    vector from this query, and retrieve the document vectors for the documents in the index
+    with relation to this query_list, and if do_ranking is true, we sort the document vectors
+    by cosine score with the query vector, otherwise we just return all documents where
+    the at least one word in the query_list appears.
 
     Args:
         query_list (list): the list of query string to be ranked against
         dictionary (dictionary): dictionary of the posting lists
         posting_file (str): address to the posting file list
-        accepted_doc_id (set): set of valid doc_id from phrasal queries in the given query text
-
+        tagged_prio_list (set): set of valid doc_id from phrasal queries in the given query text
+        do_ranking (bool): Whether ranking should be performed, or an unsorted list is sufficient
     Returns:
         if do_ranking:
             list(int), list(float) The list of doc_id's sorted by score, and query_term_vector

@@ -3,15 +3,18 @@ from constants import DOC_ID, POS_LIST
 from nltk import word_tokenize
 
 def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
-	""" 
-	Takes a query string and returns the value of the phrasal query.
+	"""Takes a query string and returns the value of the phrasal query.
 	
-	Format of the query string will be "a" or "a b" or "a b c".
+	Format of the query string will be "a" or "a b" or "a b c". Documents
+	that contain all words in the string, and have them in consecutive posting
+	positions will be returned in the result.
 
-	Arguments:
-		query_string 	The query.
+	Args:
+		query_string (str): The query
+		dictionary (dict): The dictionary to postings in the posting_fijle
+		posting_file: The posting file
 	Returns:
-		list[docId] 	A list of integers representing the doc Ids.
+		list[docId]: A list of integers representing the doc Ids.
 	"""
 	print("Query: \"{}\" - ".format(query_string), end="")
 	words = word_tokenize(query_string)
@@ -39,32 +42,29 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 
 
 def one_word_phrasal_query(word_list_1):
-	"""
-	Given a list of posting lists, return the docId's which result from the phrasal query.
+	"""Given a list of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_1 should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
-	Arguments:
-		word_list_1 	The postings list for the first word in the phrase 
+	Args:
+		word_list_1: The postings list for the first word in the phrase 
 	Returns:
-		list[docId] 	A list of integers representing the doc Ids containing the phrase
+		list[docId]: A list of integers representing the doc Ids containing the phrase
 	"""
 	return [triplet[DOC_ID] for triplet in word_list_1]
 
 
 def two_word_phrasal_query(word_list_1, word_list_2):
-	"""
-	Given two lists of posting lists, return the docId's which result from the phrasal query.
+	"""Given two lists of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
-	Arguments:
-		word_list_1 	The list of postings lists for the first word in the phrase 
-		word_list_2 	The list of postings lists for the second word in the phrase
+	Args:
+		word_list_1: The list of postings lists for the first word in the phrase 
+		word_list_2: The list of postings lists for the second word in the phrase
 	Returns:
-		list[docId] A list of integers representing the doc Ids containing a phrase
+		list[docId]: A list of integers representing the doc Ids containing a phrase
 	"""
-
 	idx1, idx2 = 0, 0
 	result = []
 	while idx1 < len(word_list_1) and idx2 < len(word_list_2):
@@ -86,17 +86,16 @@ def two_word_phrasal_query(word_list_1, word_list_2):
 
 
 def two_list_phrasal_query(list1, list2, complete=False):
-	"""
-	Given two lists of position indices, return true if there exists x where list1 contains x and list2 contains (x+1).
+	"""Given two lists of position indices, return true if there exists x where list1 contains x and list2 contains (x+1).
 	
 	If complete is True, return a full list of indices instead.
 
-	Arguments:
-		list1		The list of positions containing the first word in a phrase
-		list2 		The list of positions containing the second word in a phrase
-		complete	If this is False, we return a boolean, otherwise a list[docId]
+	Args:
+		list1: The list of positions containing the first word in a phrase
+		list2: The list of positions containing the second word in a phrase
+		complete: If this is False, we return a boolean, otherwise a list[docId]
 	Returns:
-		bool 		The phrase exists in the two lists
+		bool: The phrase exists in the two lists
 	or
 		list[docId] The list of positions x, where word x in the document is the phrase "word1 word2"
 	"""
@@ -119,19 +118,17 @@ def two_list_phrasal_query(list1, list2, complete=False):
 
 	return result if complete else False
 
-
 def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
-	"""
-	Given two words, return the docId's which result from the phrasal query.
+	"""Given three lists of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
-	Arguments:
-		word_list_1 	The list of postings lists for the first word in the phrase 
-		word_list_2 	The list of postings lists for the second word in the phrase 
-		word_list_3 	The list of postings lists for the third word in the phrase 
+	Args:
+		word_list_1: The list of postings lists for the first word in the phrase 
+		word_list_2: The list of postings lists for the second word in the phrase 
+		word_list_3: The list of postings lists for the third word in the phrase 
 	Returns:
-		list[docId] A list of integers representing the doc Ids containing a phrase
+		list[docId]:  A list of integers representing the doc Ids containing a phrase
 	"""
 	idx1, idx2, idx3 = 0, 0, 0
 	result = []
@@ -161,21 +158,20 @@ def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
 
 
 def three_list_phrasal_query(list1, list2, list3, complete=False):
-	"""
-	Given two lists of position indices, return true if there exists x where list1 contains x,
+	"""Given three lists of position indices, return true if there exists x where list1 contains x,
 		list2 contains (x+1), and list3 contains (x+2).
 	
 	If complete is True, return a full list of indices instead.
 
 	Arguments:
-		list1		The list of positions containing the first word in a phrase
-		list2 		The list of positions containing the second word in a phrase
-		list3 		The list of positions containing the third word in a phrase
-		complete	If this is False, we return a boolean, otherwise a list[docId]
+		list1: The list of positions containing the first word in a phrase
+		list2: The list of positions containing the second word in a phrase
+		list3: The list of positions containing the third word in a phrase
+		complete: If this is False, we return a boolean, otherwise a list[docId]
 	Returns:
-		bool 		The phrase exists in the two lists
+		bool: The phrase exists in the two lists
 	or
-		list[docId] The list of positions x, where word x in the document is the phrase "word1 word2 word3"
+		list[docId]: The list of positions x, where word x in the document is the phrase "word1 word2 word3"
 	"""
 	idx1, idx2, idx3 = 0, 0, 0
 	result = []

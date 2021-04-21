@@ -11,18 +11,26 @@ class QueryType(Enum):
     PHRASAL = 1
 
 def categorise_query(query: str):
-    """
-    Output a list of clauses, where each element is a tuple
-    of the clause, its type, and the boolean operator to connect with the next element.
+    """Split a query into a list of clauses.
 
-    Each clause will be tagged with the clause type and its boolean operator.
-    Boolean operator is used to connect to the next clause.
+    A query can be thought of multiple subqueries connected by AND operators, and each
+    subquery can consist of multiple clauses, which are either free text queries or phrasal queries.
+    The clauses in a subquery are implicitly connected via OR operators.
+    
+    Each element in the result is a subquery, which is a list of tuples, where each tuple
+    is a clause, its type, and the boolean operator to connect with the next element.
 
     This method reads the query from left to right; stopping at every keywords ('"', AND)
     and determine that the substring in between as keywords as clauses.
 
     e.g. Input: "little puppy" AND chihuahua
-         Output: [('little puppy', <QueryType.PHRASAL>, <BooleanOp.AND>), ('chihuahua', <QueryType.FREE_TEXT>, <BooleanOp.OR>)]
+         Output: [('little puppy', <QueryType.PHRASAL>), ('chihuahua', <QueryType.FREE_TEXT>)]
+
+    Args: 
+        query(str): The raw query
+    Returns:
+        list(list(clause, QueryType)): The list of subqueries resulting from splitting the query,
+                                                  where each subquery is a list of clauses
     """
     if (len(query) < 1):
         return
@@ -66,8 +74,7 @@ def categorise_query(query: str):
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
-    """
-    Returns the intersection between doc_list1 and doc_list2.
+    """Returns the intersection between doc_list1 and doc_list2.
 
     Both doc_list1 and doc_list2 has the following format for each elem:
     (doc_id, clause_type)
@@ -82,6 +89,12 @@ def intersect_document_ids(doc_list1, doc_list2):
          doc_list2 = [(1, QueryType.FREE_TEXT)]
 
          Outputs [(1, QueryType.PHRASAL)]
+        
+    Args:
+        doc_list1 (list(doc_id, QueryType)): The first list of clauses
+        doc_list2 (list(doc_id, QueryType)): The second list of clauses
+    Returns:
+        list(doc_id, QueryType): The merged list of clauses
     """
     # TODO: See whether sorting step is necessary or not
     doc_list1.sort(key=lambda x: x[0])
@@ -108,8 +121,7 @@ def intersect_document_ids(doc_list1, doc_list2):
     return result
 
 def union_document_ids(doc_list1, doc_list2):
-    """
-    Returns the union between doc_list1 and doc_list2.
+    """Returns the union between doc_list1 and doc_list2.
 
     Both doc_list1 and doc_list2 has the following format for each elem:
     (doc_id, clause_type)
@@ -124,6 +136,12 @@ def union_document_ids(doc_list1, doc_list2):
          doc_list2 = [(1, QueryType.FREE_TEXT)]
 
          Outputs [(1, QueryType.PHRASAL), (2, QueryType.FREE_TEXT)]
+    
+    Args:
+        doc_list1 (list(doc_id, QueryType)): The first list of clauses
+        doc_list2 (list(doc_id, QueryType)): The second list of clauses
+    Returns:
+        list(doc_id, QueryType): The merged list of clauses
     """
     # TODO: See whether sorting step is necessary or not
     doc_list1.sort(key=lambda x: x[0])
@@ -163,6 +181,20 @@ def union_document_ids(doc_list1, doc_list2):
     return result
 
 def stem_clauses(query_clauses, stemmer, lemmtzr):
+    """Stem each of the subqueries in query_clauses.
+
+    query_clauses should be a list of subqueries created by categorize_query, where each subquery is
+    a list of tuples consisting of a string with the clause contents and its query type (phrasal or free text).
+    
+    The result is that all the clauses will have their clause contents sanitized and stemmed.
+
+    Args:
+        query_clauses (list(list(query_string, QueryType))): The list of query_clauses
+        stemmer: The stemmer to use
+        lemmtzr: The lemmatizer to use
+    Returns:
+        list(list(query_string, QueryType)): query_clauses with its contents sanitized
+    """
     stemmed_clauses = []
     for and_clause in query_clauses:
         stemmed_and_clause = []
@@ -183,6 +215,15 @@ def stem_clauses(query_clauses, stemmer, lemmtzr):
     return stemmed_clauses
 
 def get_words_from_clauses(query_clauses):
+    """Retrieve all words from a list of lists of query clauses.
+    
+    Each query clause consists of a tuple with the clause contents and the query type.
+
+    Args:
+        query_clauses (list(list(string, QueryType))): A list of list of tuples 
+    Returns:
+        str: A string consisting of all the words in the query clauses
+    """
     list_of_words = []
     for and_clause in query_clauses:
         and_clause_words = " ".join([clause_word for clause_word, clause_type in and_clause]).split(" ")
@@ -223,10 +264,23 @@ def get_query_term_vector(query_keys, query_counter, dictionary):
     return query_term_vector
 
 def normalize_list(lst, denominator):
+    """Return a new list which is lst with every element divided by denominator.
+    
+    Args:
+        lst (list(float)): The vector to normalize
+        denominator (float): The normalizing factor
+    Returns:
+        The normalized vector
+    """
     return list(map(lambda x: x/denominator, lst))
 
 def tag_results(results, tag):
-    """
-    Returns a list of results where each element is (result, tag).
+    """Returns a list of results where each element is (result, tag).
+
+    Arguments:
+        results (list(int)): A list of doc Id's
+        tag (QueryType): The tag to tag with
+    Returns:
+        list(int, tag): The list of tagged results
     """
     return list(map(lambda x: (x, tag), results))

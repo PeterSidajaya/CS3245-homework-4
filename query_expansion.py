@@ -11,8 +11,14 @@ from constants import *
 # https://www.nltk.org/howto/wordnet.html#similarityery
 
 def expand_clause(expression: str):
-    """
-    Apply expansion technique to the given expression.
+    """Apply query expansion to the given expression.
+
+    We first tokenize the expression, then we add the top k synonyms for each word in the expression to expand the expression.
+
+    Args:
+        expression (str): The expression to expand
+    Returns:
+        str: The expanded expression
     """
     # Tokenise and get all possible synonyms
     token_list = word_tokenize(expression)
@@ -37,9 +43,13 @@ def expand_clause(expression: str):
 ############ HELPERS ############
 
 def pos_to_wordnet(tag):
-    """
-    Replaces the Part-of-Speech(POS) tag with wordnet tag, to be compatible
-    with synset format of word.nn.pos. 
+    """Replaces the Part-of-Speech(POS) tag with wordnet tag, to be compatible
+       with synset format of word.nn.pos. 
+    
+    Args:
+        tag (str): The POS tag
+    Returns:
+        A wordnet tag corresponding to the provided tag
     """
     if tag.startswith('J'):
         return wordnet.ADJ
@@ -52,11 +62,9 @@ def pos_to_wordnet(tag):
     return None
 
 def get_synsets(tokens):
-    """
-    Given an expression, tokenise it and get the synonyms for each token.
-    Each token will be stemmed.
-
-    Returns a list of list, where each element is the synonyms of the token.
+    """Given a list of tokens, get the synonyms for each token.
+    
+    Returns a list of list, where each element is the synonyms of the corresponding token in tokens.
     Synonyms are in synsets format of word.nn.pos.
 
     e.g. Given expression 'running dog', it will be tokenised to
@@ -66,6 +74,10 @@ def get_synsets(tokens):
 
          Actual sample output is [[Synset('run.v.01'), Synset('scat.v.01'), Synset('operate.v.01'), ...],
                                   [Synset('dog.n.01'), Synset('frump.n.01'), Synset('cad.n.01'), ...]]
+    Args:
+        tokens (str): The list of tokens
+    Returns
+        list(list): List of list of synsets
     """
     tagged = pos_tag(tokens)
     synsets = []
@@ -83,14 +95,20 @@ def get_synsets(tokens):
     return synsets
 
 def remove_duplicate_synsets(synsets):
-    """
-    Remove duplicate from synsets. Synsets must be in format of word.nn.pos.
+    """Remove duplicate from synsets. 
+    
+    Synsets must be in format of word.nn.pos.
     Duplicate is detected from its lemmas_names, and not from its nn and pos.
 
     Order is preserved.
 
     e.g. Given synset of [Synset('dog.n.01'), Synset('frump.n.01'), Synset('dog.n.02'), Synset('dog.v.01')],
          returns [Synset('dog.n.01'), Synset('frump.n.01')]
+    
+    Args:
+        synsets (list): List of synsets
+    Returns:
+        list of synsets with duplicates removed
     """
     words_encountered = {}
     unique_synsets = []
@@ -106,9 +124,7 @@ def remove_duplicate_synsets(synsets):
     return unique_synsets
 
 def get_top_k_synonyms(synsets, k: int):
-    """
-    Extract top k synonyms with the highest similarity score with
-    the first synset. 
+    """Extract top k synonyms with the highest similarity score with the first synset. 
     
     We compare against the first synsets as synsets are ordered by frequency, 
     so first element is the most probable word w/o context.
@@ -117,6 +133,12 @@ def get_top_k_synonyms(synsets, k: int):
 
     For various similarity functions, please refer to:
     https://www.nltk.org/howto/wordnet.html#similarityery
+
+    Args:
+        synsets (list): A list of synsets
+        k (int): The number of synonyms to extract
+    Returns:
+        list of synonyms
     """
     if (not synsets):
         return []

@@ -36,7 +36,9 @@ on how they were categorized.
     free_text_search is done by first getting the tf-idf vector of the query (ltc), as well as the the tf-idf scores for
     each of the documents in the index (scoring.py) (lnc, normalization factors were stored during indexing). We compute the 
     cosine scores with the query vector for each document vector and rank them. For ranking (scoring.py), we prune extremely
-    low scores, and sort the documents in descending order of cosine scores. 
+    low scores, and sort the documents in descending order of cosine scores.
+        Ranking is an option - we can choose not to rank and simply return an unsorted list of potential doc_id's. As an 
+        optimization, we do not rank when computing the clause/subquery results, and only rank after intersections of all subqueries.
 
     phrasal queries are done by first finding documents that contain all words in the phrase, and for those documents,
     we check if their posting lists contain the relevant consecutive indices, e.g. the phrase "a b c" should have some x, 
@@ -118,3 +120,7 @@ We suggest that we should be graded as follows: -
 == References ==
 
 - CS3245 Piazza forum (e.g. need to filter punctuation)
+- Query expansion
+    - https://stackoverflow.com/questions/27591621/nltk-convert-tokenized-sentence-to-synset-format
+    - https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
+    - https://www.nltk.org/howto/wordnet.html#similarityery

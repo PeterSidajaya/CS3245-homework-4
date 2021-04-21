@@ -10,8 +10,25 @@ from constants import *
 from query_prf import *
 
 def process_query(query_string, dictionary, posting_file):
-    """
-    Perform search based on the query_string.
+    """Perform a search based on the query_string.
+
+    This method performs sanitization/stemming/lemmatization of the query string,
+    then splits it into subqueries joined by AND consisting of clauses joined by implicit
+    OR operators. On each clause, it processes the query with the method corresponding
+    to its type, either a free text search or a phrasal search. It performs unions on all
+    clauses within a subquery, and intersects all subqueries. It then performs a ranking
+    with a priority based scoring system. If PRF is enabled, it finally performs PRF.
+    It then prints out the final result of the query, sorted by score. 
+    
+    For more details, refer to README.
+
+    Arguments:
+        query_string (str): The raw query string
+        dictionary (dict): The dictionary to the posting lists
+        posting_file: The posting file handler
+    Returns:
+        String containing the result, which is the sorted list of doc ID's corresponding 
+        to the query.
     """
     stemmer = PorterStemmer()
     lemmatzr = WordNetLemmatizer()

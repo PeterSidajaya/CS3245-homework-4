@@ -1,8 +1,7 @@
 import pickle
 
 def index_text(token_list):
-    """
-    Convert a stream of tokens into a dictionary of term, (frequency, position list) pairs
+    """Convert a stream of tokens into a dictionary of { term: (frequency, position list) }.
 
     Args:
         token_list (list): list of tokens

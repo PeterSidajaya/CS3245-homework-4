@@ -7,7 +7,7 @@ import os
 import math
 
 def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
-    """invert a term stream to dictionary and posting files
+    """Invert a term stream to dictionary and posting files
 
     Args:
         multiple_doc_list (<list<doc_id, title, token_list>>): list consisting of (doc_id, title, token_list) tuples
@@ -70,7 +70,7 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
 
 def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add, posting_file_2_add,
     output_dictionary_add, output_posting_add):
-    """merge two pairs of dictionary and posting files
+    """Merge two pairs of dictionary and posting files
 
     Args:
         dictionary_1_add (str): add of the first dictionary file
@@ -171,7 +171,7 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
 
 
 def merge_lists(list_1, list_2):
-    """merge two sorted lists into one sorted list with an OR operation.
+    """Merge two sorted lists into one sorted list with an OR operation.
 
     Args:
         list_1 (list<int>) The first sorted list

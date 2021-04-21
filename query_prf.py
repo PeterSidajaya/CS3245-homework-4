@@ -12,35 +12,33 @@ import pickle
 import random
 
 def prf_search(ranked_list, query_keys, query_term_vector, dictionary, posting_file):
-    """rank the list of document based on the query given, using prf.
+    """Rank the list of document based on the query given, using prf.
 
-    We first perform a tf-idf similar to that in free_text_search, but after ranking them, we take
-    the first PRF_NUM_OF_RESULTS documents, and take all the words in their titles, and recompute a
-    new query vector that is a weighted average of the original query vector and the tf-idf of each
-    of the docs with the words in the titles, and perform another tf-idf on this extended query vector.
+    We look at the top K documents and extend the query vector with the most common words of
+    each of them. We then compute the document vectors for each of our top K vectors corresponding
+    to this extended query vector, and compute the centroid. We make a new query vector from a 
+    weighted average of the original query vector with this centroid. 
+
+    We then perform a final search with the original top K documents as our priority list, with this
+    new query vector.
 
     Args:
-        ranked_list_with_scores (list(doc_id, score)): The result of free text query
+        ranked_list_with_scores (list(doc_id, score)): The result of an innitial free text query (ranked)
+        query_keys (list(str)): The list of tokens in the query
+        query_term_vector (list(float)): The query vector with tf-idf scores corresponding to query_keys 
         dictionary (dictionary): dictionary of the posting lists
         posting_file (str): address to the posting file list
-        accepted_doc_id (set): set of valid doc_id from phrasal queries in the given query text
-        stemmer: The stemmer to use on titles
-        lemmatzr: The lemmatizer to use on titles
     Returns:
-        str: search rank result
+        list(int): list of document id's, sorted by search rank result
     """
     # These are the best docs that we will assume are relevant for PRF
     best_docs = ranked_list[:PRF_NUM_OF_RESULTS]
     set_of_best_doc_ids = set(best_docs)
 
-    # =======
-    # Extend the query vector with words in the best docs.
+    # Extend the query vector with most common words in the best docs.
     extend_query_with_impt_words(query_term_vector, query_keys,
                                      set_of_best_doc_ids, dictionary)
 
-    # Alternative is to extend with titles, but the titles are actually useless from our experiments
-    # extend_query_by_title(query_term_vector, query_keys, set_of_best_doc_ids,
-    #                       dictionary, posting_file, stemmer, lemmatzr)
     doc_matrix = get_tf_idf(set_of_best_doc_ids, query_keys, dictionary, posting_file)
     new_query_vec = get_mean_vector(doc_matrix, len(query_keys))
     new_query_vec = weighted_average(query_term_vector, PRF_QUERY_VEC_WEIGHT,
@@ -53,22 +51,19 @@ def prf_search(ranked_list, query_keys, query_term_vector, dictionary, posting_f
     return prf_list
 
 def extend_query_with_impt_words(original_query_term_vector, query_keys, valid_doc_ids, dictionary):
-    """Extend query_keys by words in the titles of valid_doc_ids.
+    """Extend query_keys by the most common words in valid_doc_ids.
 
     This function will extend the original_query_term_vector with the same number of 0's as words
-    were added to query_keys, whereby the words added are words in the titles of the valid_doc_ids.
-
-    This is done until time_limit, since the number of words in the documents reaches infinity.
+    were added to query_keys, whereby the words added are the most common words in the valid_doc_ids.
+    Note that this requires that the documents had stop words removed during indexing.
 
     Args:
         original_query_term_vector (list(float)) The query term vector
         query_keys (list(str)) The unique words in the query
         valid_doc_ids (set(int)) The documents to find the vectors for
         dictionary (dictionary): dictionary of the posting lists
-        posting_file (str): address to the posting file list
-        stemmer: Stemmer to use on title
-        lemmatzr: Lemmatizer to use on title
     """
+    # Use this to prevent adding duplicate words
     present_keys = set(query_keys)
     for doc_id in valid_doc_ids:
         impt_words = dictionary[IMPT_KEYWORD][doc_id]
@@ -82,57 +77,15 @@ def extend_query_with_impt_words(original_query_term_vector, query_keys, valid_d
                 original_query_term_vector.append(0)
                 query_keys.append(token)
 
-def extend_query_as_much_as_possible(original_query_term_vector, query_keys, valid_doc_ids, time_limit, dictionary, posting_file):
-    """Extend query_keys by random words in valid_doc_ids.
-
-    This function will extend the original_query_term_vector with the same number of 0's as words
-    were added to query_keys, whereby the words added are randomly selected words of the valid_doc_ids.
-
-    This is done until time_limit, since the number of words in the documents reaches infinity. The
-    reason for this random method is that we cannot store an inverted index due to memory constraints.
-
-    Args:
-        original_query_term_vector (list(float)) The query term vector
-        query_keys (list(str)) The unique words in the query
-        valid_doc_ids (set(int)) The documents to find the vectors for
-        time_limit (float) The amount of time that is allowed to be spent on extension.
-        dictionary (dictionary): dictionary of the posting lists
-        posting_file (str): address to the posting file list
-    """
-    prev_time = time.perf_counter()
-    total_time = 0
-    no_of_words = len(dictionary)
-
-    possible_words = list(dictionary.keys())
-    num_checked = len(query_keys)
-    # To add a hard limit for query vector size, uncomment this line instead
-    # while total_time < time_limit and num_checked < no_of_words and len(query_keys) < 20:
-    while total_time < time_limit and num_checked < no_of_words: # and len(query_keys) < 20:
-        term = random.choice(possible_words)
-        if term == DOCUMENT_LENGTH_KEYWORD or term == IMPT_KEYWORD:
-            num_checked += 1
-            continue
-        docs = get_word_list(term, dictionary, posting_file)
-        for (doc_id, _, _) in docs:
-            if doc_id in valid_doc_ids:
-                original_query_term_vector.append(0)
-                query_keys.append(term)
-                break
-
-        # Update timer
-        curr_time = time.perf_counter()
-        total_time += curr_time - prev_time
-        prev_time = curr_time
-        num_checked += 1
-
 def get_mean_vector(best_docs, num_words):
     """From a document matrix, return the centroid.
 
-    For best_docs, this is a list of triples, where triple[2] is the document vector.
+    best_docs is a list<triple>, where triple[2] is the document vector.
     We return the mean of the document vectors.
 
     Args:
-        best_docs (list((_, _, list(float))) The document matrix
+        best_docs (list((_, _, list(float))): The document matrix - a list of tuples containing document vectors
+        num_words (int): The length of each document vector
     Returns:
         list(float) The centroid of the document vectors
     """
@@ -165,7 +118,7 @@ def get_tf_idf(valid_doc_ids, query_keys, dictionary, posting_file):
     """Returns a document matrix, similar to get_results_for_vector but for only the valid doc ids.
 
     Cosine scores are not computed, just raw tf-idf scores. This is a "light version" of
-    get_results_for_vector, so the output format is similar to it.
+    get_results_for_vector, so the output format is similar to it for compatibility.
 
     The result is a list of document id's and their corresponding document vectors for
     the given words in the query_keys.

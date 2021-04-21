@@ -18,27 +18,44 @@ tag_map['R'] = wn.ADV
 
 
 def lemmatize(token_list):
-    """lemmatize every token in a given list of tokens
+    """Lemmatize every token in a given list of tokens
+
+    Args:
+        token_list (list(str)): List of tokens
+    Returns:
+        list(str): lemmatized list of tokens
     """
     return [lemmatizer.lemmatize(token.lower(), tag_map[tag[0]]) for token, tag in nltk.pos_tag(token_list)]
 
 def stem(token_list):
-    """stem every token in a given list of tokens
+    """Stem every token in a given list of tokens
+    
+    Args:
+        token_list (list(str)): List of tokens
+    Returns:
+        list(str): stemmed list of tokens
     """
     return [stemmer.stem(token.lower()) for token in token_list]
 
 def lemmatize_and_stem(token_list):
-    """combine both of the functions above. idk, in case this is faster
+    """Lemmatize then stem every token in a given list of tokens.
+    
+    Args:
+        token_list (list(str)): List of tokens
+    Returns:
+        list(str): lemmatized and stemmed list of tokens
     """
     return [stemmer.stem(lemmatizer.lemmatize(token.lower(), tag_map[tag[0]])) for token, tag in nltk.pos_tag(token_list)]
 
 def sanitise(long_string):
-    """Tokenize the a string text into a list of tokens and remove any non-alphanumeric characters and stop words, except for
-    currency characters and numbers with punctuation (100,000.00). Use as a substitute for word_tokenize().
+    """Tokenize and sanitize a long string text.
+    
+    Tokenize the string text into a list of tokens and remove any non-alphanumeric 
+    characters and stop words, except for currency characters and numbers with 
+    punctuation (100,000.00). Use as a substitute for word_tokenize().
 
     Args:
         long_string (str): the text
-
     Returns:
         list: list of filtered tokens
     """
@@ -70,13 +87,26 @@ def sanitise(long_string):
     
 
 def sanitise_word(string):
+    """Remove any non-alphanumeric characters,
+    
+    Args:
+        string (str): The string to sanitize
+    Returns:
+        str: The string with non-alphanumeric characters removed
+    """
     if not is_numeric(string):
         return regex.sub(r'[^a-zA-Z0-9\_\-\p{Sc}]', ' ', string)
     else:
         return string
 
-
 def is_numeric(string):
+    """Check if a string is numeric.
+
+    Args:
+        string (str): The string to check.
+    Returns:
+        True if the string is purely numeric, false otherwise.
+    """
     if regex.match(r'[0-9]+[^0-9][0-9]+', string):
         return True
     else:

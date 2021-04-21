@@ -18,10 +18,13 @@ def usage():
     print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
 
 # main function
-def build_index(doc_id, out_dict, out_postings):
-    """
-    build index from the csv file,
-    then output the dictionary file and postings file
+def build_index(input_directory, out_dict, out_postings):
+    """Build index from the csv file, then output the dictionary file and postings file.
+
+    Args:
+        input_directory (str): input csv filename
+        out_dict (str): output dictionary filename
+        out_postings (str): output postings filename
     """
     stemmer = nltk.stem.PorterStemmer()
     lemmatizer = nltk.stem.WordNetLemmatizer()
@@ -50,7 +53,7 @@ def build_index(doc_id, out_dict, out_postings):
         os.mkdir(POSTING_DIR)
 
     # Opens the csv
-    with open(doc_id, newline='', encoding='UTF-8') as f:
+    with open(input_directory, newline='', encoding='UTF-8') as f:
         reader = csv.reader(f)
 
         # this is the tokens that will be passed through to the invert() function

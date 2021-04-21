@@ -5,16 +5,23 @@ from query_util import QueryType
 import math
 
 def rank_document_ids(results_with_score, tagged_prio_list=None):
-    """
-    Rank document ids, given two lists:
-        1. results_with_score: the list of results with score but no tag
-        2. tagged_prio_list: the list of results with tags but no score
+    """Perform ranking of the documents, with priority weightage.
 
-    Tag here refers to QueryType enum.
+    The basis of the scoring is that the scores in results_with_score (from cosine score
+    of the document with a query vector) will be weighted with a priority list.
+
+    The tagged priority list is a list of documents with a QueryType label,
+    indicating whether it was present in a phrasal query, or only free text queries.
 
     In this ranking process, score of the results that comes from phrasal search and
     results that comes from tagged_prio_list will be multiplied with weight
-    (defined in constants.py).
+    (defined in constants.py). This gives higher scores to those that are present in the
+    priority list, presumably because they appeared in the AND intersections of subqueries.
+
+    Arguments:
+        results_with_score (list(doc_id, score)): the list of results from tf-idf
+        tagged_prio_list (list(docId, QueryType)): the list of documents with tags,
+                                                   that survived the AND intersection of all subqueries.
     """
     # Weed out the weakest results, extreme low score lowers the overall benchmark
     initial_benchmark = get_avg_score(results_with_score) * FILTER_STRENGTH
@@ -45,10 +52,13 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     return weighted_list
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
-    """
-    Output the merging of the scored_list and tagged_list.
+    """Output the merging of the scored_list and tagged_list.
 
-    The method output a list, where each element is (doc_id, score, tag).
+    This is used to merge the priority list with the result of a free text query,
+    whereby some of the clauses in the priority list may not have appeared in the
+    free text query, and vice versa.
+
+    The method outputs a list, where each element is (doc_id, score, tag).
 
     The 2 lists are:
         1. scored_list: the list of results with score but no tag
@@ -64,6 +74,12 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
         3. If a result is only contained in tagged_list,
            then the result will inherit the score from default_score & tag from
            tagged_list.
+    
+    Args:
+        scored_list (list(doc_id, score)): The list of documents resulting from a free text query
+        tagged_list (list(doc_id, QueryType)): The list of documents in the priority list
+        default_score (float): The default score for those without a score
+        default_tag (QueryType): The default tag for those without a tag
     """
     tagged_score = []
 
@@ -86,9 +102,13 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
     return [(k, v[0], v[1]) for k, v in tagged_score_dict.items()]
 
 def get_avg_score(results_with_score):
-    """
-    Get the average score of the results.
-    ASsumes that the format of each element is (doc_id, score)
+    """Get the average score of the results.
+    
+    This is used as a basis for the default score for documents in the priority list,
+    as well as a basis to find a filter threshold to remove results.
+
+    Args:
+        results_with_score (list(doc_id, score)): The list to compute an average on
     """
     score_sum = 0
     for res in results_with_score:
@@ -100,27 +120,22 @@ def get_avg_score(results_with_score):
         return 0
 
 def get_results_for_vector(query_term_vector, query_keys, dictionary, posting_file, tagged_prio_list, do_ranking):
-    """
-    Find the document vectors for the given query term vector.
+    """Find the documents for the given query vector.
 
-    The result is a list of document id's and their corresponding document vectors for
-    the given words in the query_keys, sorted by their cosine distance with query_term_vector.
-
-    # do_ranking should be one of the QUERY MODES in constants. If NO_RANKING is selected, the
-    # valid documents are returned in arbitrary order. GET_RANKING will get them sorted by cosine score,
-    # and GET_RANKING_AND_VECTORS will return the full document matrix (include document vectors)
+    The result is a list of document id's for the given words in the query_keys, 
+    sorted by their cosine distance with query_term_vector if do_ranking is true,
+    otherwise the list is an unsorted list of all documents with at least one word in
+    query_keys.
 
     Args:
         query_term_vector (list(int)) The tf-idf of the query terms in query_keys
         query_keys (list(str)) The unique words in the query
         dictionary (dictionary): dictionary of the posting lists
         posting_file (str): address to the posting file list
+        tagged_prio_list (list(doc_id, QueryType)): The priority list
         do_ranking (bool): Whether the returned list is sorted or not
     Returns:
-        if do_ranking:
-            list(doc_id, score) List of document id's for the query vector and scores
-        else:
-            list(doc_id) List of document ids
+        list(doc_id) List of document id's sorted by score if do_ranking, else unsorted
     """
     # dictionary["LENGTH"] is the normalize denominator for a particular document_id which precomputed in index stage
     ranking_list = []
