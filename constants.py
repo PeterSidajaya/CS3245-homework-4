@@ -5,8 +5,8 @@ USE_STEMMER = True
 USE_LEMMATIZER = False 
 
 # Result ranking
-PHRASAL_WEIGHT = 1.4    # the higher it is, the more weight phrasal results has
-PRIORITY_WEIGHT = 1.0   # the higher it is, the more weight initial results has
+PHRASAL_WEIGHT = 1.7    # the higher it is, the more weight phrasal results has
+PRIORITY_WEIGHT = 1.1   # the higher it is, the more weight initial results has
 FILTER_STRENGTH = 1.3  # the smaller it is, the more forgiving is the filter (thus more results)
 
 # BM25 parameters
@@ -25,7 +25,7 @@ DOUBLE_QUOTE_KEYWORD = "\""
 QUERY_KEYWORDS = [AND_KEYWORD, DOUBLE_QUOTE_KEYWORD]
 
 ### QUERY EXPANSION ###
-EXPAND_NUM_OF_SYNONYMS = 2
+EXPAND_NUM_OF_SYNONYMS = 3
 
 ### QUERY PSEUDO RELEVANCE FEEDBACK ###
 PRF_NUM_OF_RESULTS = 5
