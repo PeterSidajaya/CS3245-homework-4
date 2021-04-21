@@ -154,10 +154,3 @@ nltk.download('averaged_perceptron_tagger')
 
 print("start indexing...")
 build_index(input_directory, output_file_dictionary, output_file_postings)
-
-# Testing purposes
-# posting_file = open('postings.txt', 'rb')
-# dictionary_file = open('dict.txt', 'rb')
-# dictionary = pickle.load(dictionary_file)
-# posting_list = get_list('destroy', dictionary, posting_file)
-# print(posting_list[0])

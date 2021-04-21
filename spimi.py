@@ -73,8 +73,7 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
     """merge two pairs of dictionary and posting files
 
     Args:
-        dictionary_1_add
-     (str): add of the first dictionary file
+        dictionary_1_add (str): add of the first dictionary file
         posting_file_1_add (str): address of the first posting file
         dictionary_file_2_add (str): address of the second dictionary file
         posting_file_2_add (str): address of the second posting file
@@ -172,7 +171,11 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
 
 
 def merge_lists(list_1, list_2):
-    """merge two lists into one
+    """merge two sorted lists into one sorted list with an OR operation.
+
+    Args:
+        list_1 (list<int>) The first sorted list
+        list_2 (list<int>) The second sorted list
     """
     i = 0
     j = 0
@@ -191,4 +194,3 @@ def merge_lists(list_1, list_2):
     list.extend(list_1[i:])
     list.extend(list_2[j:])
     return list
-

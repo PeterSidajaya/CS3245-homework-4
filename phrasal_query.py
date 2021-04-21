@@ -6,7 +6,7 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	""" 
 	Takes a query string and returns the value of the phrasal query.
 	
-	Format of the query string will be "a b" or "a b c".
+	Format of the query string will be "a" or "a b" or "a b c".
 
 	Arguments:
 		query_string 	The query.
