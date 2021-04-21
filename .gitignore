@@ -7,3 +7,4 @@ dataset/
 *.txt
 *.ipynb
 *.csv
+result_check.py

@@ -64,30 +64,31 @@ def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_
             document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
             potential_document_id.add(doc_id)
     
-    # calculate cosine score
-    for doc_id in potential_document_id:
-        document_term_vector = []
-        score = []
-
-        # calculate cosine score
-        for i in range(len(query_keys)):
-            term = query_keys[i]
-
-            if (term not in document_term_dict or doc_id not in document_term_dict[term]):
-                score.append(0)
-            else:
-                score.append(document_term_dict[term][doc_id] * query_term_vector[i])
-
-        # final cosine score for ranking
-        score = sum(score)
-
-        ranking_list.append((doc_id, score))
-
+    # With ranking
     if (do_ranking):
+        # Calculate score for each document
+        for doc_id in potential_document_id:
+            score = []
+
+            # Iterate for each term score
+            for i in range(len(query_keys)):
+                term = query_keys[i]
+
+                if (term not in document_term_dict or doc_id not in document_term_dict[term]):
+                    score.append(0)
+                else:
+                    score.append(document_term_dict[term][doc_id] * query_term_vector[i])
+
+            # Final score for document
+            score = sum(score)
+            ranking_list.append((doc_id, score))
+
         ranking_list = rank_document_ids(ranking_list, tagged_prio_list)
+        return [x for x, y in ranking_list]
 
-    return [x for x, y in ranking_list]
-
+    # Without ranking
+    else:
+        return list(potential_document_id)
 
 def normalize_list(lst, denominator):
     return list(map(lambda x: x/denominator, lst))

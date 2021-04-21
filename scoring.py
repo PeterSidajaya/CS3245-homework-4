@@ -13,13 +13,17 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     results that comes from tagged_prio_list will be multiplied with weight 
     (defined in constants.py). 
     """
+    # Weed out the weakest results, extreme low score lowers the overall benchmark
+    initial_benchmark = get_avg_score(results_with_score) * FILTER_STRENGTH
+    filtered_score_list = list(filter(lambda x: x[1] > initial_benchmark, results_with_score))
+
     # Default score will only be assigned to doc_ids in tagged_prio_list
-    default_score = get_avg_score(results_with_score) * PRIORITY_WEIGHT
+    default_score = get_avg_score(filtered_score_list) * PRIORITY_WEIGHT
     # Default tag will only be assigned to doc_ids in results_with_score
     default_tag = QueryType.FREE_TEXT
 
     # Combine the scored results and tagged result
-    combined_list = combine_score_and_tag(results_with_score, tagged_prio_list, default_score, default_tag)    
+    combined_list = combine_score_and_tag(filtered_score_list, tagged_prio_list, default_score, default_tag)
 
     # Apply weighting for results that comes from phrasal query
     weighted_list = []
