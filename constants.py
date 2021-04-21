@@ -7,7 +7,7 @@ USE_LEMMATIZER = False
 # Result ranking
 PHRASAL_WEIGHT = 1.4    # the higher it is, the more weight phrasal results has
 PRIORITY_WEIGHT = 1.0   # the higher it is, the more weight initial results has
-FILTER_STRENGTH = 1.1  # the smaller it is, the more forgiving is the filter (thus more results)
+FILTER_STRENGTH = 1.3  # the smaller it is, the more forgiving is the filter (thus more results)
 
 # BM25 parameters
 BM25_B = 0.75
