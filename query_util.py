@@ -1,6 +1,7 @@
 from enum import Enum
 from constants import *
 from nltk import word_tokenize
+from index_helper import sanitise
 
 import re
 import math
@@ -169,8 +170,7 @@ def stem_clauses(query_clauses, stemmer, lemmtzr):
         # Iterate through each clause under the and clause
         for or_clause in and_clause:
             clause, clause_type = or_clause
-            
-            tokens = word_tokenize(clause)
+            tokens = sanitise(clause)
 
             # Stem word by word
             stemmed_tokens = tokens
