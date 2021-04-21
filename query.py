@@ -18,7 +18,7 @@ def process_query(query_string, dictionary, posting_file):
 
     # Categorise query
     query_clauses = categorise_query(query_string)
-    
+
     # Stem
     stemmed_query_clauses = stem_clauses(query_clauses, stemmer, lemmatzr)
 
@@ -43,13 +43,13 @@ def process_query(query_string, dictionary, posting_file):
                 free_text_list = word_tokenize(clause_word)
                 expanded_words.extend(free_text_list)
 
-                curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
+                curr_result  = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
                 curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
 
             # Combine with the existing results
             and_clause_result = union_document_ids(and_clause_result, curr_result)
 
-        all_and_results.append(and_clause_result)    
+        all_and_results.append(and_clause_result)
 
     # Perform intersection between and clauses
     combined_result = all_and_results[0]
@@ -61,17 +61,10 @@ def process_query(query_string, dictionary, posting_file):
     query_list = list(set(query_list))
 
     # Score and rank
+    final_result, query_term_vector = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
+
     if USE_PRF:
-        final_result = prf_search(query_list, dictionary, posting_file, combined_result, stemmer, lemmatzr)
-    else:
-        final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True) 
+        final_result = prf_search(final_result, query_list, query_term_vector, dictionary, posting_file)
 
-
-
+    # Omit scores for final output
     return " ".join(str(doc_id) for doc_id in final_result)
-
-def tag_results(results, tag):
-    """
-    Returns a list of results where each element is (result, tag).
-    """
-    return list(map(lambda x: (x, tag), results))

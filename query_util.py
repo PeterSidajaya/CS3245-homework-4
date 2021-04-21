@@ -14,19 +14,19 @@ def categorise_query(query: str):
     """
     Output a list of clauses, where each element is a tuple
     of the clause, its type, and the boolean operator to connect with the next element.
-    
+
     Each clause will be tagged with the clause type and its boolean operator.
     Boolean operator is used to connect to the next clause.
 
     This method reads the query from left to right; stopping at every keywords ('"', AND)
     and determine that the substring in between as keywords as clauses.
 
-    e.g. Input: "little puppy" AND chihuahua 
+    e.g. Input: "little puppy" AND chihuahua
          Output: [('little puppy', <QueryType.PHRASAL>, <BooleanOp.AND>), ('chihuahua', <QueryType.FREE_TEXT>, <BooleanOp.OR>)]
     """
     if (len(query) < 1):
         return
-    
+
     and_clauses = re.split(AND_KEYWORD, query)
     query_clauses = []
 
@@ -40,10 +40,10 @@ def categorise_query(query: str):
             spliced_query = and_clause[curr_str_idx:]
             clause = ""
             closest_keyword_pos = 0
-            
+
             # Finding closest double quote
             closest_keyword_pos = spliced_query.find(DOUBLE_QUOTE_KEYWORD)
-            
+
             if (is_last_keyword_quote):
                 is_last_keyword_quote = False
                 clause_type = QueryType.PHRASAL
@@ -62,7 +62,7 @@ def categorise_query(query: str):
             curr_str_idx = closest_keyword_pos if closest_keyword_pos == -1 else curr_str_idx + next_idx + len(DOUBLE_QUOTE_KEYWORD)
 
         query_clauses.append(processed_and_clause)
-    
+
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
@@ -101,9 +101,9 @@ def intersect_document_ids(doc_list1, doc_list2):
         # doc_list1[pointer] is smaller, advance the pointer
         elif doc_list1[idx0][0] < doc_list2[idx1][0]:
             idx0 += 1
-        
+
         # doc_list2[pointer] is smaller, advance the pointer
-        else: 
+        else:
             idx1 += 1
     return result
 
@@ -148,14 +148,14 @@ def union_document_ids(doc_list1, doc_list2):
             idx0 += 1
 
         # doc_list2[pointer] is smaller, advance the pointer
-        else: 
+        else:
             result.append(doc_list2[idx1])
             idx1 += 1
-    
-    # List one has still elements 
+
+    # List one has still elements
     if idx0 < len(doc_list1):
         result.extend(doc_list1[idx0:])
-    
+
     # List two has still elements
     if idx1 < len(doc_list2):
         result.extend(doc_list2[idx1:])
@@ -181,7 +181,7 @@ def stem_clauses(query_clauses, stemmer, lemmtzr):
 
             stemmed_words = " ".join(stemmed_tokens)
             stemmed_and_clause.append((stemmed_words, clause_type))
-        
+
         stemmed_clauses.append(stemmed_and_clause)
     return stemmed_clauses
 
@@ -191,3 +191,45 @@ def get_words_from_clauses(query_clauses):
         and_clause_words = " ".join([clause_word for clause_word, clause_type in and_clause]).split(" ")
         list_of_words.extend(and_clause_words)
     return list_of_words
+
+def get_query_term_vector(query_keys, query_counter, dictionary):
+    """retrieve the tf-idf of the query vector.
+
+    Args:
+        query_keys (list(str)) The terms in the query
+        query_counter (dict(str:int)) The number of occurences of each string in query_keys
+        dictionary (dict) The dictionary of the posting lists
+    Returns:
+        list(float) The tf-idf query vector corresponding to query_keys
+    """
+    query_term_vector = []
+    query_length = 0
+    no_of_document = len(dictionary[DOCUMENT_LENGTH_KEYWORD])
+
+    for term in query_keys:
+        tf_idf_score = 0
+
+        if (term in dictionary):
+            term_info = dictionary[term]
+            term_df = term_info[0]
+
+            tf_idf_score = (1 + math.log(query_counter[term], 10)) * math.log(no_of_document / term_df)
+            query_length += (tf_idf_score ** 2)
+
+        query_term_vector.append(tf_idf_score)
+
+    normalize_denominator = math.sqrt(query_length)
+    if (normalize_denominator != 0):
+        # final precompute query vector
+        query_term_vector = normalize_list(query_term_vector, normalize_denominator)
+
+    return query_term_vector
+
+def normalize_list(lst, denominator):
+    return list(map(lambda x: x/denominator, lst))
+
+def tag_results(results, tag):
+    """
+    Returns a list of results where each element is (result, tag).
+    """
+    return list(map(lambda x: (x, tag), results))

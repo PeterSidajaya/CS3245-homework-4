@@ -1,12 +1,10 @@
 #!/usr/bin/python3
 import re
-from typing import Deque
 import nltk
 import sys
 import getopt
 import pickle
 from query import process_query
-
 
 def usage():
     print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")

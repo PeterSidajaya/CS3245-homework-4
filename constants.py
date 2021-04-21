@@ -2,7 +2,7 @@
 
 # Query processing
 USE_STEMMER = True
-USE_LEMMATIZER = False 
+USE_LEMMATIZER = False
 USE_PRF = True
 
 # Result ranking
@@ -14,7 +14,7 @@ FILTER_STRENGTH = 1.3  # the smaller it is, the more forgiving is the filter (th
 DOCUMENT_LENGTH_KEYWORD = "LENGTH"
 TITLE_KEYWORD = "TITLE"
 SPIMI_BLOCK_SIZE = 1000
-POSTING_DIR = "temp_postings_result_dir/" 
+POSTING_DIR = "temp_postings_result_dir/"
 
 ### QUERY KEYWORD ###
 AND_KEYWORD = "AND"
@@ -32,6 +32,11 @@ PRF_QUERY_VEC_UPDATE_WEIGHT = 0.9
 PRF_TIME_LIMIT = 8
 
 ### PHRASAL QUERIES ###
-DOC_ID = 0 
-TF = 1 
+DOC_ID = 0
+TF = 1
 POS_LIST = 2
+
+### QUERY MODES ###
+NO_RANKING = 0
+GET_RANKING = 1
+GET_RANKING_AND_VECTORS = 2
