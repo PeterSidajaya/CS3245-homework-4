@@ -38,7 +38,7 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
         # Calculate document length for document normalization in search
         dictionary[DOCUMENT_LENGTH_KEYWORD][int(doc_id)] = math.sqrt(length)
 
-        # Add title to the dictionary
+        # Add most frequent words in the document to the dictionary (for PRF)
         token_counter = Counter(token_list)
         frequent_tokens = list(map(lambda x: x[0], token_counter.most_common(PRF_NUM_OF_WORDS_PER_DOC)))
         dictionary[IMPT_KEYWORD][int(doc_id)] = frequent_tokens
