@@ -2,6 +2,7 @@
 from constants import *
 from spimi import invert, merge_files
 from word_processing import sanitise
+from tqdm import tqdm
 
 import re
 import nltk
@@ -59,7 +60,7 @@ def build_index(doc_id, out_dict, out_postings):
         num_of_blocks = 0
         files_in_block = 0
 
-        for idx, row in enumerate(reader):
+        for idx, row in tqdm(enumerate(reader)):
             # Skip first row
             if idx == 0:                  
                 continue
