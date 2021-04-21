@@ -1,8 +1,10 @@
+from index_helper import index_text
+from constants import *
+from collections import Counter
+
 import pickle
 import os
 import math
-from index_helper import index_text
-from constants import *
 
 def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     """invert a term stream to dictionary and posting files
@@ -16,7 +18,7 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        # This is where we'll store the length of each docs
     dictionary[IMPT_KEYWORD] = {}
 
-    for doc_id, frequent_tokens, token_list in multiple_doc_list:
+    for doc_id, token_list in multiple_doc_list:
         content_dict = index_text(token_list)
         length = 0
 
@@ -37,6 +39,8 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
         dictionary[DOCUMENT_LENGTH_KEYWORD][int(doc_id)] = math.sqrt(length)
 
         # Add title to the dictionary
+        token_counter = Counter(token_list)
+        frequent_tokens = list(map(lambda x: x[0], token_counter.most_common(PRF_NUM_OF_WORDS_PER_DOC)))
         dictionary[IMPT_KEYWORD][int(doc_id)] = frequent_tokens
 
     # This part onwards will store the dictionary and posting list to the files

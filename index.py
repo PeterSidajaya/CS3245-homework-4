@@ -2,15 +2,13 @@
 from constants import *
 from collections import Counter
 from spimi import invert, merge_files
-from index_helper import sanitise
+from word_processing import sanitise
 
 import re
 import nltk
 import sys
 import getopt
 import os
-import pickle
-import string
 import csv
 import shutil
 import math
@@ -71,21 +69,13 @@ def build_index(doc_id, out_dict, out_postings):
 
             doc_id, title, content, date_posted, court = row
 
-            filtered_list = sanitise(content)
-            token_list = filtered_list
-            # This line is if you want to do stemming
-            if (USE_STEMMER):
-                token_list = list(map(lambda x: stemmer.stem(x.lower()), filtered_list))
-
-            # This line is if you want to do lemmatization instead
-            if (USE_LEMMATIZER):
-                token_list = list(map(lambda x: lemmatizer.lemmatize(x.lower()), filtered_list))
-
-            token_counter = Counter(token_list)
-            frequent_tokens = list(map(lambda x: x[0], token_counter.most_common(PRF_NUM_OF_WORDS_PER_DOC)))
-
-            multiple_doc_list.append((int(doc_id), frequent_tokens, token_list))
+            token_list = sanitise(content)
+            multiple_doc_list.append((int(doc_id), token_list))
             files_in_block += 1
+            
+            # # Use this to monitor indexing
+            # print(idx, '/17154')
+            # print(idx/17154 * 100, '%')
 
             # If the number of files scanned has reach block size, then invert first
             if files_in_block == SPIMI_BLOCK_SIZE:
