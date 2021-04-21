@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from constants import *
 from spimi import invert, merge_files
-from word_processing import lemmatize, stem, sanitise
+from word_processing import sanitise
 
 import re
 import nltk
@@ -28,7 +28,7 @@ def build_index(doc_id, out_dict, out_postings):
     dictionary = {}
 
     # # For testing purposes
-    # limit = 1000
+    # limit = 100
 
     # This is where we'll store the length of each docs
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
@@ -70,19 +70,13 @@ def build_index(doc_id, out_dict, out_postings):
 
             doc_id, title, content, date_posted, court = row
 
-            filtered_list = sanitise(content)
-            token_list = filtered_list
-            
-            # This line is if you want to do lemmatization (prefer to do this before stemming, as stemming might not return a real word)
-            if (USE_LEMMATIZER):
-                token_list = lemmatize(token_list)
-                
-            # This line is if you want to do stemming after or instead
-            if (USE_STEMMER):
-                token_list = stem(token_list)
-
+            token_list = sanitise(content)
             multiple_doc_list.append((int(doc_id), token_list))
             files_in_block += 1
+            
+            # # Use this to monitor indexing
+            # print(idx, '/17154')
+            # print(idx/17154 * 100, '%')
 
             # If the number of files scanned has reach block size, then invert first
             if files_in_block == SPIMI_BLOCK_SIZE:

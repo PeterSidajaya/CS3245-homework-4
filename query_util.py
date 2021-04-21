@@ -91,13 +91,6 @@ def stem_clauses(query_clauses, stemmer, lemmtzr):
 
             # Stem word by word
             stemmed_tokens = tokens
-            
-            # Do lemmatization before stemming
-            if (USE_LEMMATIZER):
-                stemmed_tokens = lemmatize(stemmed_tokens)
-            if (USE_STEMMER):
-                stemmed_tokens = stem(stemmed_tokens)
-
             stemmed_words = " ".join(stemmed_tokens)
             stemmed_and_clause.append((stemmed_words, clause_type))
         
