@@ -1,5 +1,8 @@
 ### CONFIG ###
 
+# Indexing
+REMOVE_STOPWORDS = True
+
 # Query processing
 USE_STEMMER = True
 USE_LEMMATIZER = False

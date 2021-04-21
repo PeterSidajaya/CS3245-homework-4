@@ -2,8 +2,10 @@ from nltk.corpus import wordnet as wn
 from collections import defaultdict
 from constants import *
 from nltk.corpus import stopwords
+from flashtext import KeywordProcessor
 
 import nltk
+import re
 import regex
 
 nltk.download('stopwords')
@@ -14,6 +16,19 @@ tag_map = defaultdict(lambda : wn.NOUN)
 tag_map['J'] = wn.ADJ
 tag_map['V'] = wn.VERB
 tag_map['R'] = wn.ADV
+
+keyword_processor = KeywordProcessor()
+for word in stopwords.words('english'):
+    keyword_processor.add_keyword(word, '__EMPTY__')
+
+
+def flashtext_replacement(text):
+    text = keyword_processor.replace_keywords(text)
+    pattern = r"__EMPTY__\s?"
+    text = re.sub(pattern, '', text)
+
+    return text.strip()
+
 
 def lemmatize(token_list):
     """lemmatize every token in a given list of tokens
@@ -45,16 +60,16 @@ def sanitise(long_string):
     
     # Remove non-alphanumeric characters
     sanitised_list = [sanitise_word(string) for string in word_list]
-    second_tokenization_list = [nltk.tokenize.word_tokenize(string) for string in sanitised_list]
-    flattened_list = [token for token_list in second_tokenization_list for token in token_list]
-    
+    token_list = " ".join(sanitised_list).split()
+
     # Remove stop words
-    removed_list = [token for token in flattened_list if token not in stopwords.words('english')]
+    if (REMOVE_STOPWORDS):
+        removed_list = flashtext_replacement(keyword_processor.replace_keywords(" ".join(token_list))).split()
+        token_list = removed_list
 
     # Apply stemming and/or lemmatization
-    token_list = removed_list
     if (USE_LEMMATIZER and USE_STEMMER):
-            token_list = lemmatize_and_stem(token_list)
+        token_list = lemmatize_and_stem(token_list)
     else:
         # This line is if you want to do lemmatization (prefer to do this before stemming, as stemming might not return a real word)
         if (USE_LEMMATIZER):
