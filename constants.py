@@ -5,12 +5,17 @@ USE_STEMMER = True
 USE_LEMMATIZER = False 
 
 # Result ranking
-PHRASAL_WEIGHT = 1.1    # the higher it is, the more weight phrasal results has
-PRIORITY_WEIGHT = 1.1   # the higher it is, the more weight initial results has
-FILTER_STRENGTH = 0.6  # the smaller it is, the more forgiving is the filter (thus more results)
+PHRASAL_WEIGHT = 1.4    # the higher it is, the more weight phrasal results has
+PRIORITY_WEIGHT = 1.0   # the higher it is, the more weight initial results has
+FILTER_STRENGTH = 1.1  # the smaller it is, the more forgiving is the filter (thus more results)
+
+# BM25 parameters
+BM25_B = 0.75
+BM25_K = 1.2
 
 ### INDEX ###
 DOCUMENT_LENGTH_KEYWORD = "LENGTH"
+DOCUMENT_AVG_LENGTH_KEYWORD = "LENGTH_AVG"
 SPIMI_BLOCK_SIZE = 1000
 POSTING_DIR = "temp_postings_result_dir/" 
 

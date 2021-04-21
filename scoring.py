@@ -1,6 +1,8 @@
 from query_util import QueryType
 from constants import *
 
+import math
+
 def rank_document_ids(results_with_score, tagged_prio_list=None):
     """
     Rank document ids, given two lists:
@@ -13,13 +15,16 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     results that comes from tagged_prio_list will be multiplied with weight 
     (defined in constants.py). 
     """
+    initial_benchmark = get_avg_score(results_with_score) * FILTER_STRENGTH
+    filtered_score_list = list(filter(lambda x: x[1] > initial_benchmark, results_with_score))
+
     # Default score will only be assigned to doc_ids in tagged_prio_list
-    default_score = get_avg_score(results_with_score) * PRIORITY_WEIGHT
+    default_score = get_avg_score(filtered_score_list) * PRIORITY_WEIGHT
     # Default tag will only be assigned to doc_ids in results_with_score
     default_tag = QueryType.FREE_TEXT
 
     # Combine the scored results and tagged result
-    combined_list = combine_score_and_tag(results_with_score, tagged_prio_list, default_score, default_tag)    
+    combined_list = combine_score_and_tag(filtered_score_list, tagged_prio_list, default_score, default_tag)    
 
     # Apply weighting for results that comes from phrasal query
     weighted_list = []
@@ -90,3 +95,17 @@ def get_avg_score(results_with_score):
         return score_sum / len(results_with_score)
     else:
         return 0
+
+def get_bm25_score(tf, num_of_doc_containing_term, total_num_of_docs, avg_dl):
+    """
+    Scoring formula is taken from Okapi BM25. For details, see:
+    https://en.wikipedia.org/wiki/Okapi_BM25
+    """
+    idf_num = total_num_of_docs - num_of_doc_containing_term + 0.5
+    idf_denom = num_of_doc_containing_term + 0.5
+    idf = math.log((idf_num/idf_denom) + 1)
+
+    score_num = tf * (BM25_K + 1)
+    score_denom =  tf + BM25_K * (1 - BM25_B + BM25_B * total_num_of_docs / avg_dl)
+    score = idf * (score_num / score_denom)
+    return score

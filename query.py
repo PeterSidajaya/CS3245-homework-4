@@ -15,6 +15,10 @@ def process_query(query_string, dictionary, posting_file):
     stemmer = PorterStemmer()
     lemmatzr = WordNetLemmatizer()
 
+    # Required for BM25 scoring
+    total_length_documents = sum(dictionary[DOCUMENT_LENGTH_KEYWORD].values())
+    dictionary[DOCUMENT_AVG_LENGTH_KEYWORD] = total_length_documents / len(dictionary[DOCUMENT_LENGTH_KEYWORD])
+
     # Categorise query
     query_clauses = categorise_query(query_string)
     
