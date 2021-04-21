@@ -13,11 +13,10 @@ import string
 import csv
 import shutil
 import math
-
+from collections import Counter
 
 def usage():
     print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
-    
 
 # main function
 def build_index(doc_id, out_dict, out_postings):
@@ -30,14 +29,14 @@ def build_index(doc_id, out_dict, out_postings):
     dictionary = {}
 
     # # For testing purposes
-    # limit = 1000
+    limit = 1000
 
     # This is where we'll store the length of each docs
-    dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
+    dictionary[DOCUMENT_LENGTH_KEYWORD] = {}
 
     max_int = sys.maxsize
     while True:
-        # decrease the max_int value by factor 10 
+        # decrease the max_int value by factor 10
         # as long as the OverflowError occurs.
         try:
             csv.field_size_limit(max_int)
@@ -63,12 +62,12 @@ def build_index(doc_id, out_dict, out_postings):
 
         for idx, row in enumerate(reader):
             # Skip first row
-            if idx == 0:                  
+            if idx == 0:
                 continue
 
             # # End if limit is reached, for testing purposes
-            # if idx == limit:
-            #     break
+            if idx == limit:
+                break
 
             doc_id, title, content, date_posted, court = row
 
@@ -82,7 +81,10 @@ def build_index(doc_id, out_dict, out_postings):
             if (USE_LEMMATIZER):
                 token_list = list(map(lambda x: lemmatizer.lemmatize(x.lower()), filtered_list))
 
-            multiple_doc_list.append((int(doc_id), title, token_list))
+            token_counter = Counter(token_list)
+            frequent_tokens = list(map(lambda x: x[0], token_counter.most_common(PRF_NUM_OF_WORDS_PER_DOC)))
+
+            multiple_doc_list.append((int(doc_id), frequent_tokens, token_list))
             files_in_block += 1
 
             # If the number of files scanned has reach block size, then invert first
@@ -93,7 +95,7 @@ def build_index(doc_id, out_dict, out_postings):
                 num_of_blocks += 1
                 files_in_block = 0
                 multiple_doc_list = []
-        
+
     # Invert the remaining block
     if (files_in_block != 0):
         print('Inverting block number ' + str(num_of_blocks + 1))
@@ -104,7 +106,7 @@ def build_index(doc_id, out_dict, out_postings):
 
 
     # MERGING STAGE, binary merging (iterate until height of binary tree)
-    for i in range(math.ceil(math.log(num_of_blocks, 2))): 
+    for i in range(math.ceil(math.log(num_of_blocks, 2))):
         # Generation: #i
         k = 0
         for j in range(0, num_of_blocks, 2):

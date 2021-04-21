@@ -52,31 +52,7 @@ def prf_search(ranked_list, query_keys, query_term_vector, dictionary, posting_f
 
     return prf_list
 
-def get_k_most_impt_words(doc_id):
-    present_keys = set(query_keys)
-    for doc_id in valid_doc_ids:
-        # Get the document's title and tokenize it
-        title = dictionary[TITLE_KEYWORD][doc_id]
-        tokens = word_tokenize(title)
-        # Stem word by word
-        stemmed_tokens = []
-        if (USE_LEMMATIZER):
-            stemmed_tokens = list(map(lambda x: lemmtzr.lemmatize(x).lower(), tokens))
-        if (USE_STEMMER):
-            stemmed_tokens = list(map(lambda x: stemmer.stem(x).lower(), tokens))
-
-        # Add all tokens in the title that were not already added, to the query vector
-        for token in stemmed_tokens:
-            if token not in present_keys and token in dictionary:
-                # Prevent double adding words to the query vector
-                present_keys.add(token)
-                # Add it to the query vector.
-                # The query vector value is 0 because it was not in the actual query
-                original_query_term_vector.append(0)
-                query_keys.append(token)
-
-def extend_query_by_title(original_query_term_vector, query_keys, valid_doc_ids, dictionary,
-    posting_file, stemmer, lemmatzr):
+def extend_query_with_impt_words(original_query_term_vector, query_keys, valid_doc_ids, dictionary):
     """Extend query_keys by words in the titles of valid_doc_ids.
 
     This function will extend the original_query_term_vector with the same number of 0's as words
@@ -95,18 +71,9 @@ def extend_query_by_title(original_query_term_vector, query_keys, valid_doc_ids,
     """
     present_keys = set(query_keys)
     for doc_id in valid_doc_ids:
-        # Get the document's title and tokenize it
-        title = dictionary[TITLE_KEYWORD][doc_id]
-        tokens = word_tokenize(title)
-        # Stem word by word
-        stemmed_tokens = []
-        if (USE_LEMMATIZER):
-            stemmed_tokens = list(map(lambda x: lemmtzr.lemmatize(x).lower(), tokens))
-        if (USE_STEMMER):
-            stemmed_tokens = list(map(lambda x: stemmer.stem(x).lower(), tokens))
-
-        # Add all tokens in the title that were not already added, to the query vector
-        for token in stemmed_tokens:
+        impt_words = dictionary[IMPT_KEYWORD][doc_id]
+        # Add all tokens in the important keywords that were not already added, to the query vector
+        for token in impt_words:
             if token not in present_keys and token in dictionary:
                 # Prevent double adding words to the query vector
                 present_keys.add(token)
@@ -142,7 +109,7 @@ def extend_query_as_much_as_possible(original_query_term_vector, query_keys, val
     # while total_time < time_limit and num_checked < no_of_words and len(query_keys) < 20:
     while total_time < time_limit and num_checked < no_of_words: # and len(query_keys) < 20:
         term = random.choice(possible_words)
-        if term == DOCUMENT_LENGTH_KEYWORD or term == TITLE_KEYWORD:
+        if term == DOCUMENT_LENGTH_KEYWORD or term == IMPT_KEYWORD:
             num_checked += 1
             continue
         docs = get_word_list(term, dictionary, posting_file)

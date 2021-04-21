@@ -14,9 +14,9 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     """
     dictionary = {}
     dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        # This is where we'll store the length of each docs
-    dictionary[TITLE_KEYWORD] = {}
+    dictionary[IMPT_KEYWORD] = {}
 
-    for doc_id, title, token_list in multiple_doc_list:
+    for doc_id, frequent_tokens, token_list in multiple_doc_list:
         content_dict = index_text(token_list)
         length = 0
 
@@ -25,22 +25,22 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
             tf, position_list = tup
             if term not in dictionary:
                 # First entry is df, the rest is the posting list, which consist of the doc id, tf, and position list
-                dictionary[term] = (1, [(int(doc_id), tf, position_list)])      
+                dictionary[term] = (1, [(int(doc_id), tf, position_list)])
             else:
                 df = dictionary[term][0] + 1
                 posting_list = dictionary[term][1] + [(int(doc_id), tf, position_list)]
                 dictionary[term] = (df, posting_list)
             # Document length is calculated from tf
-            length += (1 + math.log(tf, 10)) ** 2       
-        
+            length += (1 + math.log(tf, 10)) ** 2
+
         # Calculate document length for document normalization in search
         dictionary[DOCUMENT_LENGTH_KEYWORD][int(doc_id)] = math.sqrt(length)
-        
+
         # Add title to the dictionary
-        dictionary[TITLE_KEYWORD][int(doc_id)] = title
+        dictionary[IMPT_KEYWORD][int(doc_id)] = frequent_tokens
 
     # This part onwards will store the dictionary and posting list to the files
-    
+
     dictionary_file = open(dictionary_file_add, 'wb')
     posting_file = open(posting_file_add, 'wb')
 
@@ -52,7 +52,7 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     for term, value in dictionary.items():
         if term == DOCUMENT_LENGTH_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
             continue
-        if term == TITLE_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
+        if term == IMPT_KEYWORD:                # IMPT_KEYWORD is not a term, it will be stored in the dictionary
             continue
         df, posting_list = value
         pointer = posting_file.tell()           # find our current position in the posting file
@@ -103,7 +103,7 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
     for term in dictionary_1.keys():
         if term == DOCUMENT_LENGTH_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
             continue
-        if term == TITLE_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
+        if term == IMPT_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
             continue
         df_1 = df_2 = 0
         df_1, pointer_1 = dictionary_1[term]
@@ -122,12 +122,12 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
         pointer = posting_output.tell()
         pickle.dump(posting_list, posting_output)
         dictionary[term] = (df_1 + df_2, pointer)
-    
+
     # For terms in dictionary_2 but not in dictionary_1
     for term in dictionary_2.keys():
         if term == DOCUMENT_LENGTH_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
             continue
-        if term == TITLE_KEYWORD:     # LENGTH is not a term, it will be stored in the dictionary
+        if term == IMPT_KEYWORD:                # IMPT_KEYWORD is not a term, it will be stored in the dictionary
             continue
         if term not in dictionary:
             df_2, pointer_2 = dictionary_2[term]
@@ -144,14 +144,14 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
     length_dict2 = dictionary_2[DOCUMENT_LENGTH_KEYWORD]
     length_dict = {**length_dict1, **length_dict2}          # merge two dictionaries
     dictionary[DOCUMENT_LENGTH_KEYWORD] = length_dict
-    
-    # Combine the TITLE
-    title_dict1 = dictionary_1[TITLE_KEYWORD]
-    title_dict2 = dictionary_2[TITLE_KEYWORD]
-    title_dict = {**title_dict1, **title_dict2}             # merge two dictionaries
-    dictionary[TITLE_KEYWORD] = title_dict
 
-    # Dump the dictionary    
+    # Combine the IMPT
+    title_dict1 = dictionary_1[IMPT_KEYWORD]
+    title_dict2 = dictionary_2[IMPT_KEYWORD]
+    title_dict = {**title_dict1, **title_dict2}             # merge two dictionaries
+    dictionary[IMPT_KEYWORD] = title_dict
+
+    # Dump the dictionary
     pickle.dump(dictionary, dictionary_output)
 
     # Close the files
