@@ -8,8 +8,6 @@ import nltk
 import sys
 import getopt
 import os
-import pickle
-import string
 import csv
 import shutil
 import math

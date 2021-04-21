@@ -1,6 +1,4 @@
 import pickle
-import regex
-import nltk
 
 def index_text(token_list):
     """
