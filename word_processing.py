@@ -79,5 +79,3 @@ def is_numeric(string):
         return True
     else:
         return False
-    
-print(sanitise('Me and my brothers are very close'))
