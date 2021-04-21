@@ -57,7 +57,7 @@ def sanitise(long_string):
     """
     # Tokenize
     word_list = nltk.tokenize.word_tokenize(long_string)
-    
+
     # Remove non-alphanumeric characters
     sanitised_list = [sanitise_word(string) for string in word_list]
     token_list = " ".join(sanitised_list).split()
@@ -80,6 +80,7 @@ def sanitise(long_string):
             token_list = stem(token_list)
 
     return token_list
+
 
 def sanitise_word(string):
     if not is_numeric(string):
