@@ -1,11 +1,12 @@
 from constants import *
 from collections import Counter
 from index_helper import get_word_list
+from scoring import rank_document_ids
 
 import math
 import pickle
 
-def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_ranking=True):
+def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_ranking=True):
     """rank the list of document based on the query given
 
     Args:
@@ -63,35 +64,31 @@ def free_text_search(query_list, dictionary, posting_file, accepted_doc_id, do_r
             document_term_dict[term][doc_id] = tf_score / dictionary[DOCUMENT_LENGTH_KEYWORD][doc_id]  # normalize score
             potential_document_id.add(doc_id)
     
-    # calculate cosine score
-    for doc_id in potential_document_id:
-        document_term_vector = []
-        score = []
-
-        # calculate cosine score
-        for i in range(len(query_keys)):
-            term = query_keys[i]
-
-            if (term not in document_term_dict or doc_id not in document_term_dict[term]):
-                score.append(0)
-            else:
-                score.append(document_term_dict[term][doc_id] * query_term_vector[i])
-
-        # final cosine score for ranking
-        score = sum(score)
-
-        ranking_list.append((score, doc_id))
-
+    # With ranking
     if (do_ranking):
-        ranking_list.sort(key=lambda x: x[0], reverse=True)
+        # Calculate score for each document
+        for doc_id in potential_document_id:
+            score = []
 
-    if (accepted_doc_id == None):
-        tf_idf_doc_list = [y for x, y in ranking_list]
+            # Iterate for each term score
+            for i in range(len(query_keys)):
+                term = query_keys[i]
+
+                if (term not in document_term_dict or doc_id not in document_term_dict[term]):
+                    score.append(0)
+                else:
+                    score.append(document_term_dict[term][doc_id] * query_term_vector[i])
+
+            # Final score for document
+            score = sum(score)
+            ranking_list.append((doc_id, score))
+
+        ranking_list = rank_document_ids(ranking_list, tagged_prio_list)
+        return [x for x, y in ranking_list]
+
+    # Without ranking
     else:
-        tf_idf_doc_list = [y for x, y in ranking_list if y in accepted_doc_id]
-        
-    return tf_idf_doc_list
-
+        return list(potential_document_id)
 
 def normalize_list(lst, denominator):
     return list(map(lambda x: x/denominator, lst))

@@ -65,16 +65,101 @@ def categorise_query(query: str):
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
-    doc_list = [doc_list1, doc_list2]
+    """
+    Returns the intersection between doc_list1 and doc_list2.
 
-    # sort by lower domain first
-    doc_list.sort(key=len)
-    return list(set(doc_list[0]).intersection(*doc_list[1:]))
+    Both doc_list1 and doc_list2 has the following format for each elem:
+    (doc_id, clause_type)
+
+    Special case: when a document ID is contained both in doc_list1 and doc_list2
+    BUT with different tags, we will prioritise QueryType.PHRASAL.
+
+    This is so because results tagged with QueryType.PHRASAL is deemed
+    to have higher importance.
+
+    e.g. doc_list1 = [(1, QueryType.PHRASAL), (2, QueryType.FREE_TEXT)]
+         doc_list2 = [(1, QueryType.FREE_TEXT)]
+
+         Outputs [(1, QueryType.PHRASAL)]
+    """
+    # TODO: See whether sorting step is necessary or not
+    doc_list1.sort(key=lambda x: x[0])
+    doc_list2.sort(key=lambda x: x[0])
+
+    result = []
+    idx0, idx1 = 0, 0
+    while idx0 < len(doc_list1) and idx1 < len(doc_list2):
+        # Matching element
+        if doc_list1[idx0][0] == doc_list2[idx1][0]:
+            is_phrasal = doc_list1[idx0][1] == QueryType.PHRASAL or doc_list2[idx1][1] == QueryType.PHRASAL
+            clause_type = QueryType.PHRASAL if is_phrasal else QueryType.FREE_TEXT
+            result.append((doc_list1[idx0][0], clause_type))
+            idx0 += 1
+            idx1 += 1
+
+        # doc_list1[pointer] is smaller, advance the pointer
+        elif doc_list1[idx0][0] < doc_list2[idx1][0]:
+            idx0 += 1
+        
+        # doc_list2[pointer] is smaller, advance the pointer
+        else: 
+            idx1 += 1
+    return result
 
 def union_document_ids(doc_list1, doc_list2):
-    doc_list = [doc_list1, doc_list2]
+    """
+    Returns the union between doc_list1 and doc_list2.
 
-    return list(set(doc_list[0]).union(*doc_list[1:]))
+    Both doc_list1 and doc_list2 has the following format for each elem:
+    (doc_id, clause_type)
+
+    Special case: when a document ID is contained both in doc_list1 and doc_list2
+    BUT with different tags, we will prioritise QueryType.PHRASAL.
+
+    This is so because results tagged with QueryType.PHRASAL is deemed
+    to have higher importance.
+
+    e.g. doc_list1 = [(1, QueryType.PHRASAL), (2, QueryType.FREE_TEXT)]
+         doc_list2 = [(1, QueryType.FREE_TEXT)]
+
+         Outputs [(1, QueryType.PHRASAL), (2, QueryType.FREE_TEXT)]
+    """
+    # TODO: See whether sorting step is necessary or not
+    doc_list1.sort(key=lambda x: x[0])
+    doc_list2.sort(key=lambda x: x[0])
+
+    result = []
+    idx0, idx1 = 0, 0
+
+    # Iterate while both lists are alive
+    while idx0 < len(doc_list1) and idx1 < len(doc_list2):
+        # Matching element
+        if doc_list1[idx0][0] == doc_list2[idx1][0]:
+            is_phrasal = doc_list1[idx0][1] == QueryType.PHRASAL or doc_list2[idx1][1] == QueryType.PHRASAL
+            clause_type = QueryType.PHRASAL if is_phrasal else QueryType.FREE_TEXT
+            result.append((doc_list1[idx0][0], clause_type))
+            idx0 += 1
+            idx1 += 1
+
+        # doc_list1[pointer] is smaller, advance the pointer
+        elif doc_list1[idx0][0] < doc_list2[idx1][0]:
+            result.append(doc_list1[idx0])
+            idx0 += 1
+
+        # doc_list2[pointer] is smaller, advance the pointer
+        else: 
+            result.append(doc_list2[idx1])
+            idx1 += 1
+    
+    # List one has still elements 
+    if idx0 < len(doc_list1):
+        result.extend(doc_list1[idx0:])
+    
+    # List two has still elements
+    if idx1 < len(doc_list2):
+        result.extend(doc_list2[idx1:])
+
+    return result
 
 def stem_clauses(query_clauses, stemmer, lemmtzr):
     stemmed_clauses = []
