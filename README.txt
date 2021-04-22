@@ -143,6 +143,11 @@ assignment, because of the following reason: -
 
 We suggest that we should be graded as follows: -
 
+== Work Allocation ==
+A0184586M worked on searching and integration
+A0172307L and A0168113L worked on query refinement and PRF
+A0170766X worked on indexing
+
 == References ==
 
 - Lecture notes
