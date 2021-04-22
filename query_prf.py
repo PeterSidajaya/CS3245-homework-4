@@ -7,6 +7,9 @@ from nltk import word_tokenize
 import math
 
 def get_term_idf(term, dictionary, no_of_documents):
+    """
+    Given a term, calculate the idf score of the term.
+    """
     if term not in dictionary:
         return 0
 
@@ -18,7 +21,19 @@ def get_term_idf(term, dictionary, no_of_documents):
     idf = math.log((idf_num / idf_denom) + 1)
     return idf
 
-def prf_impt_words(ranked_list, query, dictionary):
+def prf_impt_words(ranked_list, dictionary):
+    """
+    Extract important keywords from the documents ranked at the top of
+    ranked_list.
+
+    The candidate of important keywords are extracted at indexing
+    stage, where we define important keywords to be the most frequent
+    keywords (excluding stopwords). Then, the candidate are assigned
+    idf_score. The words with highest idf are selected as the final
+    output.
+
+    Returns list of words.
+    """
     # Only take the top ranked results
     best_docs = ranked_list[:PRF_NUM_OF_RESULTS]
     no_of_documents = len(dictionary[DOCUMENT_LENGTH_KEYWORD])

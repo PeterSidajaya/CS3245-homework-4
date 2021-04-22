@@ -92,7 +92,7 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
 
     if use_prf:
         # Get new words from PRF
-        impt_words = prf_impt_words(final_result, query_string, dictionary)
+        impt_words = prf_impt_words(final_result, dictionary)
         impt_clause = categorise_query(" ".join(impt_words))[0]
         # Perform the search again with important words, but without PRF (only do it once)
         return process_query(query_string, dictionary, posting_file, use_prf=False, prf_clause=impt_clause)
