@@ -94,11 +94,15 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
         combined_result = intersect_document_ids(combined_result, and_clause_result)
 
     query_list = get_words_from_clauses(stemmed_query_clauses)
+
+    non_expanded_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
+    non_expanded_result = tag_results(non_expanded_result, QueryType.FREE_TEXT)
+    non_expanded_result = union_document_ids(combined_result, non_expanded_result)
+
     query_list.extend(expanded_words)
     query_list = list(set(query_list))
 
-    # Score and rank
-    final_result = free_text_search(query_list, dictionary, posting_file, combined_result, do_ranking=True)
+    final_result = free_text_search(query_list, dictionary, posting_file, non_expanded_result, do_ranking=True)
 
     if use_prf:
         # Get new words from PRF
