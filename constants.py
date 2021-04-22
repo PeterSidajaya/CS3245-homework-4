@@ -6,11 +6,11 @@ REMOVE_STOPWORDS = True
 # Query processing
 USE_STEMMER = True
 USE_LEMMATIZER = True
-USE_PRF = True
+USE_PRF = False
 
 # Result ranking
-PHRASAL_WEIGHT = 1.7    # the higher it is, the more weight phrasal results has
-PRIORITY_WEIGHT = 1.1   # the higher it is, the more weight initial results has
+PHRASAL_WEIGHT = 2.0    # the higher it is, the more weight phrasal results has
+PRIORITY_WEIGHT = 2.0   # the higher it is, the more weight initial results has
 FILTER_STRENGTH = 0.6   # the smaller it is, the more forgiving is the filter (thus more results)
 
 ### INDEX ###
