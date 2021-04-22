@@ -4,7 +4,6 @@ from constants import *
 from nltk.corpus import stopwords
 
 import nltk
-import re
 import regex
 
 nltk.download('stopwords')
