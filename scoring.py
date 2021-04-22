@@ -4,6 +4,7 @@ from query_util import QueryType, get_avg_score
 
 import math
 
+
 def rank_document_ids(results_with_score, tagged_prio_list=None):
     """
     Perform ranking of the documents, with priority weightage.
@@ -55,6 +56,7 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     # Sort
     weighted_list.sort(key=lambda x: x[1], reverse=True)
     return weighted_list
+
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
     """

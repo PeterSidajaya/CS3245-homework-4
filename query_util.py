@@ -6,9 +6,11 @@ from word_processing import lemmatize, stem, sanitise
 import re
 import math
 
+
 class QueryType(Enum):
     FREE_TEXT = 0
     PHRASAL = 1
+
 
 def categorise_query(query: str):
     """
@@ -82,6 +84,7 @@ def categorise_query(query: str):
 
     return query_clauses
 
+
 def intersect_document_ids(doc_list1, doc_list2):
     """
     Returns the intersection between doc_list1 and doc_list2.
@@ -129,6 +132,7 @@ def intersect_document_ids(doc_list1, doc_list2):
         else:
             idx1 += 1
     return result
+
 
 def union_document_ids(doc_list1, doc_list2):
     """
@@ -191,6 +195,7 @@ def union_document_ids(doc_list1, doc_list2):
 
     return result
 
+
 def stem_clauses(query_clauses):
     """
     Stem each of the subqueries in query_clauses.
@@ -224,6 +229,7 @@ def stem_clauses(query_clauses):
         stemmed_clauses.append(stemmed_and_clause)
     return stemmed_clauses
 
+
 def get_words_from_clauses(query_clauses):
     """
     Retrieve all words from a list of lists of query clauses.
@@ -241,6 +247,7 @@ def get_words_from_clauses(query_clauses):
         and_clause_words = " ".join([clause_word for clause_word, clause_type in and_clause]).split(" ")
         list_of_words.extend(and_clause_words)
     return list_of_words
+
 
 def get_query_term_vector(query_keys, query_counter, dictionary):
     """
@@ -276,6 +283,7 @@ def get_query_term_vector(query_keys, query_counter, dictionary):
 
     return query_term_vector
 
+
 def normalize_list(lst, denominator):
     """
     Return a new list which is lst with every element divided by denominator.
@@ -288,6 +296,7 @@ def normalize_list(lst, denominator):
     """
     return list(map(lambda x: x/denominator, lst))
 
+
 def tag_results(results, tag):
     """
     Returns a list of results where each element is (result, tag).
@@ -299,6 +308,7 @@ def tag_results(results, tag):
         list(int, tag): The list of tagged results
     """
     return list(map(lambda x: (x, tag), results))
+
 
 def get_avg_score(results_with_score):
     """

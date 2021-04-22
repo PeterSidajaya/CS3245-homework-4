@@ -8,8 +8,10 @@ import sys
 import getopt
 import pickle
 
+
 def usage():
     print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
+
 
 def run_search(dict_file, postings_file, queries_file, results_file):
     """Using the given dictionary file and postings impt_wordsearching on

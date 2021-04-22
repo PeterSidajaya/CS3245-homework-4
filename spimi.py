@@ -1,10 +1,11 @@
-from index_helper import index_text
 from constants import *
 from collections import Counter
+from index_helper import index_text
 
 import pickle
 import os
 import math
+
 
 def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     """Invert a term stream to dictionary and posting files

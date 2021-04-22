@@ -77,10 +77,6 @@ def build_index(input_directory, out_dict, out_postings):
             token_list = sanitise(content)
             multiple_doc_list.append((int(doc_id), token_list))
             files_in_block += 1
-            
-            # # Use this to monitor indexing
-            # print(idx, '/17154')
-            # print(idx/17154 * 100, '%')
 
             # If the number of files scanned has reach block size, then invert first
             if files_in_block == SPIMI_BLOCK_SIZE:

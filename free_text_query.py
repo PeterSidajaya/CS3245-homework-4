@@ -7,6 +7,7 @@ from query_util import get_query_term_vector
 import math
 import pickle
 
+
 def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_ranking=True):
     """
     Rank the list of document based on the query given.

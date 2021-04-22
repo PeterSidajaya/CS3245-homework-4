@@ -6,7 +6,7 @@ REMOVE_STOPWORDS = True
 # Query processing
 USE_STEMMER = True
 USE_LEMMATIZER = True
-USE_PRF = True
+USE_PRF = False
 
 # Result ranking
 PHRASAL_WEIGHT = 1.7    # the higher it is, the more weight phrasal results has
@@ -25,7 +25,7 @@ DOUBLE_QUOTE_KEYWORD = "\""
 QUERY_KEYWORDS = [AND_KEYWORD, DOUBLE_QUOTE_KEYWORD]
 
 ### QUERY EXPANSION ###
-EXPAND_NUM_OF_SYNONYMS = 4
+EXPAND_NUM_OF_SYNONYMS = 3
 
 ### QUERY PSEUDO RELEVANCE FEEDBACK ###
 PRF_NUM_OF_RESULTS = 30

@@ -2,12 +2,13 @@ from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk import word_tokenize
 from collections import Counter
 
+from constants import *
 from free_text_query import free_text_search
 from phrasal_query import get_phrasal_query_doc_id
-from query_expansion import expand_clause
-from query_util import *
-from constants import *
-from query_prf import *
+from query_expansion import expand_clause, QueryType
+from query_prf import prf_impt_words
+from query_util import categorise_query, intersect_document_ids, union_document_ids, stem_clauses, get_words_from_clauses, tag_results
+
 
 def process_query(query_string, dictionary, posting_file, use_prf=False, prf_clause=None):
     """

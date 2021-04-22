@@ -2,6 +2,7 @@ from index_helper import get_word_list
 from constants import DOC_ID, POS_LIST
 from nltk import word_tokenize
 
+
 def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 	"""
 	Takes a query string and returns the value of the phrasal query.

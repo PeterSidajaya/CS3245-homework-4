@@ -26,6 +26,7 @@ def lemmatize(token_list):
     """
     return [lemmatizer.lemmatize(token.lower(), tag_map[tag[0]]) for token, tag in nltk.pos_tag(token_list)]
 
+
 def stem(token_list):
     """Stem every token in a given list of tokens
     
@@ -36,6 +37,7 @@ def stem(token_list):
     """
     return [stemmer.stem(token.lower()) for token in token_list]
 
+
 def lemmatize_and_stem(token_list):
     """Lemmatize then stem every token in a given list of tokens.
     
@@ -45,6 +47,7 @@ def lemmatize_and_stem(token_list):
         list(str): lemmatized and stemmed list of tokens
     """
     return [stemmer.stem(lemmatizer.lemmatize(token.lower(), tag_map[tag[0]])) for token, tag in nltk.pos_tag(token_list)]
+
 
 def sanitise(long_string):
     """Tokenize and sanitize a long string text.
@@ -97,6 +100,7 @@ def sanitise_word(string):
         return regex.sub(r'[^a-zA-Z0-9\_\-\p{Sc}]', ' ', string)
     else:
         return string
+
 
 def is_numeric(string):
     """Check if a string is numeric.
