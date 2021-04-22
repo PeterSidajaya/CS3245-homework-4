@@ -3,7 +3,8 @@ from constants import DOC_ID, POS_LIST
 from nltk import word_tokenize
 
 def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
-	"""Takes a query string and returns the value of the phrasal query.
+	"""
+	Takes a query string and returns the value of the phrasal query.
 	
 	Format of the query string will be "a" or "a b" or "a b c". Documents
 	that contain all words in the string, and have them in consecutive posting
@@ -42,7 +43,8 @@ def get_phrasal_query_doc_id(query_string, dictionary, posting_file):
 
 
 def one_word_phrasal_query(word_list_1):
-	"""Given a list of posting lists, return the docId's which result from the phrasal query.
+	"""
+	Given a list of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_1 should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
@@ -55,7 +57,8 @@ def one_word_phrasal_query(word_list_1):
 
 
 def two_word_phrasal_query(word_list_1, word_list_2):
-	"""Given two lists of posting lists, return the docId's which result from the phrasal query.
+	"""
+	Given two lists of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
@@ -86,7 +89,8 @@ def two_word_phrasal_query(word_list_1, word_list_2):
 
 
 def two_list_phrasal_query(list1, list2, complete=False):
-	"""Given two lists of position indices, return true if there exists x where list1 contains x and list2 contains (x+1).
+	"""
+	Given two lists of position indices, return true if there exists x where list1 contains x and list2 contains (x+1).
 	
 	If complete is True, return a full list of indices instead.
 
@@ -119,7 +123,8 @@ def two_list_phrasal_query(list1, list2, complete=False):
 	return result if complete else False
 
 def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
-	"""Given three lists of posting lists, return the docId's which result from the phrasal query.
+	"""
+	Given three lists of posting lists, return the docId's which result from the phrasal query.
 
 	List of posting lists word_list_x should be formatted [ (docId1, tf1, [position1, position2,...]), ... ]
 
@@ -158,7 +163,8 @@ def three_word_phrasal_query(word_list_1, word_list_2, word_list_3):
 
 
 def three_list_phrasal_query(list1, list2, list3, complete=False):
-	"""Given three lists of position indices, return true if there exists x where list1 contains x,
+	"""
+	Given three lists of position indices, return true if there exists x where list1 contains x,
 		list2 contains (x+1), and list3 contains (x+2).
 	
 	If complete is True, return a full list of indices instead.

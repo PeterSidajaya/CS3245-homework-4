@@ -10,14 +10,24 @@ from constants import *
 from query_prf import *
 
 def process_query(query_string, dictionary, posting_file, use_prf=False, prf_clause=None):
-    """Perform a search based on the query_string.
+    """
+    Perform a search based on the query_string.
 
-    This method peimpt_wordstion/stemming/lemmatization of the query string,
-    then splits it into subqueries joined by AND consisting of clauses joined by implicit
-    OR operators. On each clause, it processes the query with the method corresponimpt_wordss type,
-    either a free text search or a phrasal search. It performs unions on all
-    clauses within a subquery, and intersects all subqueries. It then performs a ranking
-    impt_wordsrity based scoring system. If PRF is enabled, it finally performs PRF.
+    This method perform preprocessing on the query string (tokenization, stemming, lemmatization based
+    on the settings) and categorises them. For details on how a query is categorised,
+    please refer to query_util.categorise_query(). Once categorised, we perform searches
+    based on its type (PHRASAL or FREE_TEXT search).
+
+    Phrasal search is done via positional index search. For details please look at phrasal_query.py.
+    Free text search is done via normal search on each free text word. For details please look at free_text_query.py.
+
+    Within a subquery (OR clauses), it performs unions on all the results,
+    and intersects all the results between subqueries (AND clauses).
+
+    It then performs a ranking based scoring system. Please refer to scoring.py for details.
+
+    If PRF is enabled, it finally performs PRF.
+
     It then prints out the final result of the query, sorted by score. 
     
     For more details, refer to README.

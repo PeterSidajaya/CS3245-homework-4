@@ -7,9 +7,17 @@ from constants import *
 from word_processing import stem
 
 def expand_clause(expression: str):
-    """Apply query expansion to the given expression.
+    """
+    Apply query expansion to the given expression.
 
-    We first tokenize the expression, then we add the top k synonyms for each word in the expression to expand the expression.
+    We first tokenize the expression and find the synonyms
+    for each token of the expression.
+
+    Top k synonyms are selected for each token. The scoring
+    We first tokenize the expression, then we add the top k synonyms for
+    each word in the expression to expand the expression.
+
+    The top k synonyms are then used to expand the original expression.
 
     Args:
         expression (str): The expression to expand
@@ -42,8 +50,9 @@ def expand_clause(expression: str):
 ############ HELPERS ############
 
 def pos_to_wordnet(tag):
-    """Replaces the Part-of-Speech(POS) tag with wordnet tag, to be compatible
-       with synset format of word.nn.pos. 
+    """
+    Replaces the Part-of-Speech(POS) tag with wordnet tag, to be compatible
+    with synset format of word.nn.pos.
     
     Args:
         tag (str): The POS tag
@@ -61,7 +70,8 @@ def pos_to_wordnet(tag):
     return None
 
 def get_synsets(tokens):
-    """Given a list of tokens, get the synonyms for each token.
+    """
+    Given a list of tokens, get the synonyms for each token.
     
     Returns a list of list, where each element is the synonyms of the corresponding token in tokens.
     Synonyms are in synsets format of word.nn.pos.
@@ -94,7 +104,8 @@ def get_synsets(tokens):
     return synsets
 
 def remove_duplicate_synsets(synsets):
-    """Remove duplicate from synsets. 
+    """
+    Remove duplicate from synsets.
     
     Synsets must be in format of word.nn.pos.
     Duplicate is detected from its lemmas_names, and not from its nn and pos.
@@ -107,7 +118,7 @@ def remove_duplicate_synsets(synsets):
     Args:
         synsets (list): List of synsets
     Returns:
-        list of synsets with duplicates removed
+        list(list): list of synsets with duplicates removed
     """
     words_encountered = {}
     unique_synsets = []
@@ -123,7 +134,8 @@ def remove_duplicate_synsets(synsets):
     return unique_synsets
 
 def get_top_k_synonyms(synsets, k: int):
-    """Extract top k synonyms with the highest similarity score with the first synset. 
+    """
+    Extract top k synonyms with the highest similarity score with the first synset.
     
     We compare against the first synsets as synsets are ordered by frequency, 
     so first element is the most probable word w/o context.
@@ -137,7 +149,7 @@ def get_top_k_synonyms(synsets, k: int):
         synsets (list): A list of synsets
         k (int): The number of synonyms to extract
     Returns:
-        list of synonyms
+        list(str): list of synonyms
     """
     if (not synsets):
         return []
