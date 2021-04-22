@@ -194,12 +194,10 @@ def stem_clauses(query_clauses):
     query_clauses should be a list of subqueries created by categorize_query, where each subquery is
     a list of tuples consisting of a string with the clause contents and its query type (phrasal or free text).
     
-    The result is that all the clauses will have their clause contents sanitized and stemmed.
+    The result is that all the clauses will have their clause contents sanitized.
 
     Args:
         query_clauses (list(list(query_string, QueryType))): The list of query_clauses
-        stemmer: The stemmer to use
-        lemmtzr: The lemmatizer to use
     Returns:
         list(list(query_string, QueryType)): query_clauses with its contents sanitized
     """
