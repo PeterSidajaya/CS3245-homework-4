@@ -10,14 +10,23 @@ We're using Python Version <3.8.7> for this assignment.
 === INDEXING ===
 
 The indexing process is contained in index.py, with spimi.py, index_helper.py and word_processing.py containing the helper functions.
-We use SPIMI as the index is too large for a single pass. We create blocks of 1000 documents each, and merge them
-in a binary merge after all blocks are created.
 
 For the indexing of each document, we perform sanitization (word_processing.py) by first performing word_tokenization,
-removing non-alphanumeric characters and stop words, then performing lemmatization then stemming (configurable).
-The process continues by calculating the doc_freq of each term from the document list and save the postings list (doc ID, term freq) to postings.txt.
-We also need to store information at indexing time about the document length, in order to do document normalization for tf-idf calculations.
-We also store the top 5 most common words in the document to facilitate PRF.
+removing non-alphanumeric characters and stop words, then performing lemmatization then stemming (configurable) (word_processing.py).
+After that, we invert the documents by extracting the positions of the terms in order to obtain the positional lists and finding the
+term frequency of each term. We will then obtain the posting lists, which are lists of (doc ID, term freq, positional list) tuples
+(spimi.py and index_helper.py). Meanwhile, we update the document frequency of each term and store the pointer to its posting list
+in the dictionary. We also store information at indexing time about the document length in order to do document normalization for tf-idf calculations.
+We also store the top 5 most common words in the document to facilitate PRF (spimi.py).
+
+We use SPIMI (Single Pass In Memory Indexing) as the index is too large for a single pass, which means we create blocks of 1000 documents each
+and save the index to temporary dictionary and posting files. After we are done with the whole dataset, we merge them in a binary merge (spimi.py).
+
+The dictionary file stores the dictionary of terms, document frequency, and the pointers to locate the posting lists in the posting file.
+The posting file contains multiple posting lists. Each of the posting lists contains the postings and a positional list for each document,
+which are going to be used for phrasal queries. Moreover, the dictionary also contains special keys to special dictionary, which includes:
+    - DOCUMENT_LENGTH_KEYWORD   : contains the precomputed normalisation length for each document for tf-idf weighting
+    - IMPT_KEYWORD              : contains the top five important keywords for query refinement
 
 === SEARCHING ===
 
