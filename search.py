@@ -1,16 +1,18 @@
 #!/usr/bin/python3
+from query import process_query
+from constants import USE_PRF
+
 import re
 import nltk
 import sys
 import getopt
 import pickle
-from query import process_query
 
 def usage():
     print("usage: " + sys.argv[0] + " -d dictionary-file -p postings-file -q file-of-queries -o output-file-of-results")
 
 def run_search(dict_file, postings_file, queries_file, results_file):
-    """Using the given dictionary file and postings file perform searching on 
+    """Using the given dictionary file and postings impt_wordsearching on
        the given queries file and output the results to a file
 
     Args:
@@ -35,7 +37,7 @@ def run_search(dict_file, postings_file, queries_file, results_file):
         if (not query):
             out_file.write("")
         else:
-            out_file.write(process_query(query, new_dict, posting_file))
+            out_file.write(process_query(query, new_dict, posting_file, use_prf=USE_PRF))
         
         if query_list:
             out_file.write('\n')
