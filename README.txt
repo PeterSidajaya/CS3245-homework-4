@@ -45,9 +45,9 @@ on how they were categorized.
     such that x appears in posting_list_a, x+1 appears in posting_list_b, and x+2 appears in posting_list_c. 
     And if this is true we add the document to the result.
 
-Query expansion is applied on each clauses, both for the phrasal and free text clause. For phrasal queries, we still separate
-between (i) the results obtained through phrasal search on the original phrasal queries and (ii) the results obtained through search on the
-expanded phrasal queries. An example use case on this design decision can be found under `EXPANSION ON PHRASAL QUERY` section.
+Query expansion is applied on each clauses, both for the phrasal and free text clause. For phrasal queries, we still separately
+obtain (i) the results obtained through phrasal search on the original phrasal queries and (ii) the results obtained through 
+search on the expanded phrasal queries. We then union the two results for our final result of the phrasal query.
 
 After processing and intersecting all subqueries, we retrieve all unique words in the clauses and the query expansion
 of each clause, and perform a final free text search on this "query_list". e.g. if our original query was '"a b" AND c d e AND "f g"',
@@ -92,7 +92,7 @@ instead of the `phone call`.
 
 This implies that if we perform a query search on `quiet AND "phone call"`, document 6807771 will not appear as a result. However, we deem
 that document 6807771 is still relevant as it contains many "telephone call" phrases, although will not ranked high as it does not exactly match
-the given phrasal query "phone call". This lead us to still apply query expansion on the phrasal query "phone call" to still include document
+the given phrasal query "phone call". This leads us to still apply query expansion on the phrasal query "phone call" to still include document
 6807771.
 
 == Files included with this submission ==
