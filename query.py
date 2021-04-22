@@ -26,9 +26,7 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
     and intersects all the results between subqueries (AND clauses).
 
     It then performs a ranking based scoring system. Please refer to scoring.py for details.
-
     If PRF is enabled, it finally performs PRF.
-
     It then prints out the final result of the query, sorted by score. 
     
     For more details, refer to README.
