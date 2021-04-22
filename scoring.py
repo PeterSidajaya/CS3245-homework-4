@@ -5,18 +5,23 @@ from query_util import QueryType, get_avg_score
 import math
 
 def rank_document_ids(results_with_score, tagged_prio_list=None):
-    """Perform ranking of the documents, with priority weightage.
+    """
+    Perform ranking of the documents, with priority weightage.
 
-    The basis of the scoring is that the scores in results_with_score (from cosine score
-    of the document with a query vector) will be weighted with a priority list.
+    Results_with_score are list of doc_id with scores for each of them.
 
     The tagged priority list is a list of documents with a QueryType label,
     indicating whether it was present in a phrasal query, or only free text queries.
 
     In this ranking process, score of the results that comes from phrasal search and
     results that comes from tagged_prio_list will be multiplied with weight
-    (defined in constants.py). This gives higher scores to those that are present in the
-    priority list, presumably because they appeared in the AND intersections of subqueries.
+    (defined in constants.py).
+
+    Phrasal results tend to have higher weight as we assume that user are specifically searching
+    for phrasal results.
+
+    Tagged_prio_list tend to have higher weight because they appeared in the
+    AND intersections of subqueries.
 
     Arguments:
         results_with_score (list(doc_id, score)): the list of results from tf-idf
@@ -52,7 +57,8 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     return weighted_list
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
-    """Output the merging of the scored_list and tagged_list.
+    """
+    Output the merging of the scored_list and tagged_list.
 
     This is used to merge the priority list with the result of a free text query,
     whereby some of the clauses in the priority list may not have appeared in the

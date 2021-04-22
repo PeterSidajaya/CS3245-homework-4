@@ -8,7 +8,8 @@ import math
 import pickle
 
 def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_ranking=True):
-    """rank the list of document based on the query given.
+    """
+    Rank the list of document based on the query given.
 
     query_list is the list of sanitized tokens in the input query clause. We compute a query
     vector from this query, and retrieve the document vectors for the documents in the index
@@ -24,9 +25,9 @@ def free_text_search(query_list, dictionary, posting_file, tagged_prio_list, do_
         do_ranking (bool): Whether ranking should be performed, or an unsorted list is sufficient
     Returns:
         if do_ranking:
-            list(int), list(float) The list of doc_id's sorted by score, and query_term_vector
+            list(int): The list of doc_id's sorted by score
         else:
-            list(int): List of doc_id's sorted by score
+            list(int): List of doc_id's from the free text search
     """
     query_counter = Counter(query_list)
     query_keys = list(query_counter.keys())

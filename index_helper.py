@@ -1,7 +1,8 @@
 import pickle
 
 def index_text(token_list):
-    """Convert a stream of tokens into a dictionary of { term: (frequency, position list) }.
+    """
+    Convert a stream of tokens into a dictionary of { term: (frequency, position list) }.
 
     Args:
         token_list (list): list of tokens
@@ -24,7 +25,8 @@ def index_text(token_list):
 
 
 def get_word_list(term, dictionary, posting_file):
-    """Returns the posting list for a given term in the posting_file.
+    """
+    Returns the posting list for a given term in the posting_file.
 
     Args:
         term (str): the term to find the posting list of

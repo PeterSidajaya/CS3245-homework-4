@@ -6,24 +6,11 @@ from nltk import word_tokenize
 
 import math
 
-def get_term_idf(term, dictionary, no_of_documents):
-    """
-    Given a term, calculate the idf score of the term.
-    """
-    if term not in dictionary:
-        return 0
-
-    term_freq, _ = dictionary[term]
-
-    # IDF formula is from Okapi BM25 IDF
-    idf_num = no_of_documents - term_freq + 0.5
-    idf_denom = term_freq + 0.5
-    idf = math.log((idf_num / idf_denom) + 1)
-    return idf
-
 def prf_impt_words(ranked_list, dictionary):
     """
-    Extract important keywords from the documents ranked at the top of
+    Apply Pseudo Relevance Feedback(PRF) based on the ranked result of doc IDs.
+
+    PRF extracts important keywords from the documents ranked at the top of
     ranked_list.
 
     The candidate of important keywords are extracted at indexing
@@ -32,7 +19,11 @@ def prf_impt_words(ranked_list, dictionary):
     idf_score. The words with highest idf are selected as the final
     output.
 
-    Returns list of words.
+    Args:
+        ranked_list (list(doc_id)): the list of results, ordered by score
+        dictionary (dictionary): dictionary of the posting lists
+    Returns:
+        list(str): list of important words.
     """
     # Only take the top ranked results
     best_docs = ranked_list[:PRF_NUM_OF_RESULTS]
@@ -56,3 +47,29 @@ def prf_impt_words(ranked_list, dictionary):
     new_query_words = map(lambda x: x[0], new_query_words)
 
     return new_query_words
+
+def get_term_idf(term, dictionary, no_of_documents):
+    """
+    Given a term, calculate the idf score of the term.
+    The idf formula is from Okapi BM25.
+
+    Please refer to this link for more details:
+    https://en.wikipedia.org/wiki/Okapi_BM25
+
+    Args:
+        term (str): term to be scored
+        dictionary (dictionary): dictionary of the posting lists
+        no_of_documents (int): total number of documents in the dictionary
+    Returns:
+        (float): idf score of the term
+    """
+    if term not in dictionary:
+        return 0
+
+    term_freq, _ = dictionary[term]
+
+    # IDF formula is from Okapi BM25 IDF
+    idf_num = no_of_documents - term_freq + 0.5
+    idf_denom = term_freq + 0.5
+    idf = math.log((idf_num / idf_denom) + 1)
+    return idf

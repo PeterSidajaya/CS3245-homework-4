@@ -11,7 +11,8 @@ class QueryType(Enum):
     PHRASAL = 1
 
 def categorise_query(query: str):
-    """Split a query into a list of of list clauses.
+    """
+    Split a query into a list of of list clauses.
 
     A query can be thought of multiple subqueries connected by AND operators, and each
     subquery can consist of multiple clauses, which are either free text queries or phrasal queries.
@@ -38,7 +39,7 @@ def categorise_query(query: str):
         query(str): The raw query
     Returns:
         list(list(clause, QueryType)): The list of subqueries resulting from splitting the query,
-                                                  where each subquery is a list of clauses
+                                       where each subquery is a list of clauses
     """
     if (len(query) < 1):
         return
@@ -82,7 +83,8 @@ def categorise_query(query: str):
     return query_clauses
 
 def intersect_document_ids(doc_list1, doc_list2):
-    """Returns the intersection between doc_list1 and doc_list2.
+    """
+    Returns the intersection between doc_list1 and doc_list2.
 
     Both doc_list1 and doc_list2 has the following format for each elem:
     (doc_id, clause_type)
@@ -129,7 +131,8 @@ def intersect_document_ids(doc_list1, doc_list2):
     return result
 
 def union_document_ids(doc_list1, doc_list2):
-    """Returns the union between doc_list1 and doc_list2.
+    """
+    Returns the union between doc_list1 and doc_list2.
 
     Both doc_list1 and doc_list2 has the following format for each elem:
     (doc_id, clause_type)
@@ -189,10 +192,11 @@ def union_document_ids(doc_list1, doc_list2):
     return result
 
 def stem_clauses(query_clauses):
-    """Stem each of the subqueries in query_clauses.
+    """
+    Stem each of the subqueries in query_clauses.
 
-    query_clauses should be a list of subqueries created by categorize_query, where each subquery is
-    a list of tuples consisting of a string with the clause contents and its query type (phrasal or free text).
+    query_clauses has the same format as the output of categorise_query().
+    Please refer to categorise_query() for the structure.
     
     The result is that all the clauses will have their clause contents sanitized.
 
@@ -221,9 +225,11 @@ def stem_clauses(query_clauses):
     return stemmed_clauses
 
 def get_words_from_clauses(query_clauses):
-    """Retrieve all words from a list of lists of query clauses.
+    """
+    Retrieve all words from a list of lists of query clauses.
     
-    Each query clause consists of a tuple with the clause contents and the query type.
+    query_clauses has the same format as the output of categorise_query().
+    Please refer to categorise_query() for the structure.
 
     Args:
         query_clauses (list(list(string, QueryType))): A list of list of tuples 
@@ -237,14 +243,15 @@ def get_words_from_clauses(query_clauses):
     return list_of_words
 
 def get_query_term_vector(query_keys, query_counter, dictionary):
-    """retrieve the tf-idf of the query vector.
+    """
+    Retrieve the tf-idf of the query vector.
 
     Args:
-        query_keys (list(str)) The terms in the query
-        query_counter (dict(str:int)) The number of occurences of each string in query_keys
-        dictionary (dict) The dictionary of the posting lists
+        query_keys (list(str)): The terms in the query
+        query_counter (dict(str:int)): The number of occurences of each string in query_keys
+        dictionary (dict): The dictionary of the posting lists
     Returns:
-        list(float) The tf-idf query vector corresponding to query_keys
+        list(float): The tf-idf query vector corresponding to query_keys
     """
     query_term_vector = []
     query_length = 0
@@ -270,18 +277,20 @@ def get_query_term_vector(query_keys, query_counter, dictionary):
     return query_term_vector
 
 def normalize_list(lst, denominator):
-    """Return a new list which is lst with every element divided by denominator.
+    """
+    Return a new list which is lst with every element divided by denominator.
     
     Args:
         lst (list(float)): The vector to normalize
         denominator (float): The normalizing factor
     Returns:
-        The normalized vector
+        list(float): The normalized vector
     """
     return list(map(lambda x: x/denominator, lst))
 
 def tag_results(results, tag):
-    """Returns a list of results where each element is (result, tag).
+    """
+    Returns a list of results where each element is (result, tag).
 
     Arguments:
         results (list(int)): A list of doc Id's
@@ -292,13 +301,16 @@ def tag_results(results, tag):
     return list(map(lambda x: (x, tag), results))
 
 def get_avg_score(results_with_score):
-    """Get the average score of the results.
+    """
+    Get the average score of the results.
 
     This is used as a basis for the default score for documents in the priority list,
     as well as a basis to find a filter threshold to remove results.
 
     Args:
         results_with_score (list(doc_id, score)): The list to compute an average on
+    Returns:
+        (float): average score
     """
     score_sum = 0
     for res in results_with_score:

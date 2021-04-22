@@ -19,7 +19,8 @@ def usage():
 
 # main function
 def build_index(input_directory, out_dict, out_postings):
-    """Build index from the csv file, then output the dictionary file and postings file.
+    """
+    Build index from the csv file, then output the dictionary file and postings file.
 
     Args:
         input_directory (str): input csv filename
