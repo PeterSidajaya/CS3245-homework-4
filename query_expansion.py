@@ -33,7 +33,7 @@ def expand_clause(expression: str):
         synonyms = get_top_k_synonyms(synsets_token[i], EXPAND_NUM_OF_SYNONYMS + 1)
 
         # Make sure original word is included, add as first element
-        synonym_names = [synonym.lemma_names()[0] for synonym in synonyms]
+        synonym_names = [synonym.lemma_names()[0].lower() for synonym in synonyms]
         if (token_list[i] not in synonym_names):
             synonym_names.insert(0, token_list[i])
 

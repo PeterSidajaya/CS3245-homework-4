@@ -21,9 +21,6 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
     Phrasal search is done via positional index search. For details please look at phrasal_query.py.
     Free text search is done via normal search on each free text word. For details please look at free_text_query.py.
 
-    Query expansion is applied to both type of clauses; although we still make sure to tag the
-    phrasal results with phrasal tag.
-
     Within a subquery (OR clauses), it performs unions on all the results,
     and intersects all the results between subqueries (AND clauses).
 
