@@ -1,7 +1,7 @@
 from constants import *
 from collections import Counter
 from index_helper import get_word_list
-from scoring import rank_document_ids, get_results_for_vector
+from scoring import rank_document_ids
 from query_util import get_query_term_vector
 
 import math

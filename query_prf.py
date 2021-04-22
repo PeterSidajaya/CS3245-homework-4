@@ -30,7 +30,9 @@ def prf_impt_words(ranked_list, query, dictionary):
 
     # Get all saved important words
     # Important words are already sanitised stemmed and/or lemma during indexing
-    impt_words = set([dictionary[IMPT_KEYWORD][doc_id] for doc_id in best_docs])
+    impt_words = set()
+    for doc_id in best_docs:
+        impt_words.update(dictionary[IMPT_KEYWORD][doc_id])
 
     # Get top important words across all documents
     impt_words_with_idf = list(map(lambda x: (x, get_term_idf(x, dictionary, no_of_documents)), impt_words))

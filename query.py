@@ -46,11 +46,11 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
     # Additionally, prf_clause is already sanitised & lemma/stemmed, hence must not be passed into stem_clauses
     # to avoid over-stemming of the words.
     if not prf_clause is None:
-        if len(stemmed_query_clauses) > 1:
-            stemmed_query_clauses[-1][-1].extend(prf_clause)
+        if len(stemmed_query_clauses) > 0:
+            stemmed_query_clauses[-1].extend(prf_clause)
         else:
             # Edge case for empty query
-            stemmed_query_clauses.add(prf_clause)
+            stemmed_query_clauses.append(prf_clause)
 
     all_and_results = []
     expanded_words = []
@@ -97,7 +97,6 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
         # Get new words from PRF
         impt_words = prf_impt_words(final_result, query_string, dictionary)
         impt_clause = categorise_query(" ".join(impt_words))[0]
-
         # Perform the search again with important words, but without PRF (only do it once)
         return process_query(query_string, dictionary, posting_file, use_prf=False, prf_clause=impt_clause)
 

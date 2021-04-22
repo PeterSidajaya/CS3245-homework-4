@@ -85,7 +85,6 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
 
     # Tagged_prio_dict has the format of dict[doc_id] = (score, clause_type)
     tagged_score_dict = {}
-    print(tagged_list)
 
     # Tagged_prio_list has the format of (doc_id, clause_type)
     for elem in tagged_list:
