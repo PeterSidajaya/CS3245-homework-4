@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from constants import *
+from collections import Counter
 from spimi import invert, merge_files
 from word_processing import sanitise
 from tqdm import tqdm
@@ -13,16 +14,17 @@ import csv
 import shutil
 import math
 
-
 def usage():
     print("usage: " + sys.argv[0] + " -i directory-of-documents -d dictionary-file -p postings-file")
-    
 
 # main function
-def build_index(doc_id, out_dict, out_postings):
-    """
-    build index from the csv file,
-    then output the dictionary file and postings file
+def build_index(input_directory, out_dict, out_postings):
+    """Build index from the csv file, then output the dictionary file and postings file.
+
+    Args:
+        input_directory (str): input csv filename
+        out_dict (str): output dictionary filename
+        out_postings (str): output postings filename
     """
     stemmer = nltk.stem.PorterStemmer()
     lemmatizer = nltk.stem.WordNetLemmatizer()
@@ -32,11 +34,11 @@ def build_index(doc_id, out_dict, out_postings):
     # limit = 100
 
     # This is where we'll store the length of each docs
-    dictionary[DOCUMENT_LENGTH_KEYWORD] = {}        
+    dictionary[DOCUMENT_LENGTH_KEYWORD] = {}
 
     max_int = sys.maxsize
     while True:
-        # decrease the max_int value by factor 10 
+        # decrease the max_int value by factor 10
         # as long as the OverflowError occurs.
         try:
             csv.field_size_limit(max_int)
@@ -51,7 +53,7 @@ def build_index(doc_id, out_dict, out_postings):
         os.mkdir(POSTING_DIR)
 
     # Opens the csv
-    with open(doc_id, newline='', encoding='UTF-8') as f:
+    with open(input_directory, newline='', encoding='UTF-8') as f:
         reader = csv.reader(f)
 
         # this is the tokens that will be passed through to the invert() function
@@ -62,7 +64,7 @@ def build_index(doc_id, out_dict, out_postings):
 
         for idx, row in tqdm(enumerate(reader)):
             # Skip first row
-            if idx == 0:                  
+            if idx == 0:
                 continue
 
             # # End if limit is reached, for testing purposes
@@ -87,7 +89,7 @@ def build_index(doc_id, out_dict, out_postings):
                 num_of_blocks += 1
                 files_in_block = 0
                 multiple_doc_list = []
-        
+
     # Invert the remaining block
     if (files_in_block != 0):
         print('Inverting block number ' + str(num_of_blocks + 1))
@@ -98,7 +100,7 @@ def build_index(doc_id, out_dict, out_postings):
 
 
     # MERGING STAGE, binary merging (iterate until height of binary tree)
-    for i in range(math.ceil(math.log(num_of_blocks, 2))): 
+    for i in range(math.ceil(math.log(num_of_blocks, 2))):
         # Generation: #i
         k = 0
         for j in range(0, num_of_blocks, 2):
@@ -155,10 +157,3 @@ nltk.download('averaged_perceptron_tagger')
 
 print("start indexing...")
 build_index(input_directory, output_file_dictionary, output_file_postings)
-
-# Testing purposes
-# posting_file = open('postings.txt', 'rb')
-# dictionary_file = open('dict.txt', 'rb')
-# dictionary = pickle.load(dictionary_file)
-# posting_list = get_list('destroy', dictionary, posting_file)
-# print(posting_list[0])

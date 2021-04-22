@@ -1,17 +1,27 @@
-from query_util import QueryType
 from constants import *
+from index_helper import get_word_list
+from query_util import QueryType, get_avg_score
+
+import math
 
 def rank_document_ids(results_with_score, tagged_prio_list=None):
-    """
-    Rank document ids, given two lists:
-        1. results_with_score: the list of results with score but no tag
-        2. tagged_prio_list: the list of results with tags but no score
-    
-    Tag here refers to QueryType enum.
+    """Perform ranking of the documents, with priority weightage.
+
+    The basis of the scoring is that the scores in results_with_score (from cosine score
+    of the document with a query vector) will be weighted with a priority list.
+
+    The tagged priority list is a list of documents with a QueryType label,
+    indicating whether it was present in a phrasal query, or only free text queries.
 
     In this ranking process, score of the results that comes from phrasal search and
-    results that comes from tagged_prio_list will be multiplied with weight 
-    (defined in constants.py). 
+    results that comes from tagged_prio_list will be multiplied with weight
+    (defined in constants.py). This gives higher scores to those that are present in the
+    priority list, presumably because they appeared in the AND intersections of subqueries.
+
+    Arguments:
+        results_with_score (list(doc_id, score)): the list of results from tf-idf
+        tagged_prio_list (list(docId, QueryType)): the list of documents with tags,
+                                                   that survived the AND intersection of all subqueries.
     """
     # Weed out the weakest results, extreme low score lowers the overall benchmark
     initial_benchmark = get_avg_score(results_with_score) * FILTER_STRENGTH
@@ -42,15 +52,18 @@ def rank_document_ids(results_with_score, tagged_prio_list=None):
     return weighted_list
 
 def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
-    """
-    Output the merging of the scored_list and tagged_list.
+    """Output the merging of the scored_list and tagged_list.
 
-    The method output a list, where each element is (doc_id, score, tag). 
+    This is used to merge the priority list with the result of a free text query,
+    whereby some of the clauses in the priority list may not have appeared in the
+    free text query, and vice versa.
+
+    The method outputs a list, where each element is (doc_id, score, tag).
 
     The 2 lists are:
         1. scored_list: the list of results with score but no tag
         2. tagged_list: the list of results with tags but no score
-    
+
     The merging is as follows:
         1. If a result is contained within both scored_list and tagged_list,
            then the result will inherit the score from scored_list & tag from
@@ -61,16 +74,22 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
         3. If a result is only contained in tagged_list,
            then the result will inherit the score from default_score & tag from
            tagged_list.
+    
+    Args:
+        scored_list (list(doc_id, score)): The list of documents resulting from a free text query
+        tagged_list (list(doc_id, QueryType)): The list of documents in the priority list
+        default_score (float): The default score for those without a score
+        default_tag (QueryType): The default tag for those without a tag
     """
     tagged_score = []
 
     # Tagged_prio_dict has the format of dict[doc_id] = (score, clause_type)
     tagged_score_dict = {}
 
-    # Tagged_prio_list has the format of (doc_id, clause_type) 
+    # Tagged_prio_list has the format of (doc_id, clause_type)
     for elem in tagged_list:
         tagged_score_dict[elem[0]] = (default_score, elem[1])
-    
+
     # Results_with_score has the format of (doc_id, score)
     for elem in scored_list:
         if elem[0] in tagged_score_dict:
@@ -78,19 +97,5 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
         else:
             tagged_score_dict[elem[0]] = (elem[1], default_tag)
 
-    # Final output has the format of (doc_id, score, tag) 
+    # Final output has the format of (doc_id, score, tag)
     return [(k, v[0], v[1]) for k, v in tagged_score_dict.items()]
-
-def get_avg_score(results_with_score):
-    """
-    Get the average score of the results.
-    ASsumes that the format of each element is (doc_id, score)
-    """
-    score_sum = 0
-    for res in results_with_score:
-        score_sum += res[1]
-
-    if len(results_with_score) > 0:
-        return score_sum / len(results_with_score)
-    else:
-        return 0
