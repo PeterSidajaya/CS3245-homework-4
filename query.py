@@ -22,6 +22,9 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
     Phrasal search is done via positional index search. For details please look at phrasal_query.py.
     Free text search is done via normal search on each free text word. For details please look at free_text_query.py.
 
+    Query expansion is applied to both type of clauses; although we still make sure to tag the
+    phrasal results with phrasal tag.
+
     Within a subquery (OR clauses), it performs unions on all the results,
     and intersects all the results between subqueries (AND clauses).
 
@@ -68,17 +71,25 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
             clause_word, clause_type = or_clause
             curr_result = []
 
+            # Apply query expansion
+            expanded_clause_word = expand_clause(clause_word)
+            free_text_list = word_tokenize(expanded_clause_word)
+            expanded_words.extend(free_text_list)
+
             # Get result for the current clause
             if clause_type == QueryType.PHRASAL:
-                curr_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
-                curr_result = tag_results(curr_result, QueryType.PHRASAL)
+                # For phrasal, we first perform the phrasal search
+                phrasal_result = get_phrasal_query_doc_id(clause_word, dictionary, posting_file)
+                phrasal_result = tag_results(phrasal_result, QueryType.PHRASAL)
+
+                # Followed by the free text search on expanded words
+                expanded_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
+                expanded_result = tag_results(expanded_result, QueryType.FREE_TEXT)
+
+                # Result is union of the two
+                curr_result = union_document_ids(phrasal_result, expanded_result)
+
             elif clause_type == QueryType.FREE_TEXT:
-                # If we want to use clause expansion, use this
-                clause_word = expand_clause(clause_word)
-
-                free_text_list = word_tokenize(clause_word)
-                expanded_words.extend(free_text_list)
-
                 curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
                 curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
 

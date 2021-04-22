@@ -4,6 +4,7 @@ from nltk.corpus import wordnet
 
 from query_util import QueryType
 from constants import *
+from word_processing import stem
 
 def expand_clause(expression: str):
     """
@@ -36,6 +37,9 @@ def expand_clause(expression: str):
         synonym_names = [synonym.lemma_names()[0].lower() for synonym in synonyms]
         if (token_list[i] not in synonym_names):
             synonym_names.insert(0, token_list[i])
+
+        if (USE_STEMMER):
+            synonym_names = stem(synonym_names)
 
         # Concat everything
         expanded_token = ' '.join(synonym_names)
