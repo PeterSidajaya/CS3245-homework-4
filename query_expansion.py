@@ -5,11 +5,6 @@ from nltk.corpus import wordnet
 from query_util import QueryType
 from constants import *
 
-# Sources
-# https://stackoverflow.com/questions/27591621/nltk-convert-tokenized-sentence-to-synset-format
-# https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
-# https://www.nltk.org/howto/wordnet.html#similarityery
-
 def expand_clause(expression: str):
     """Apply query expansion to the given expression.
 

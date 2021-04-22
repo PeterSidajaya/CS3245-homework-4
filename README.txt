@@ -119,8 +119,8 @@ We suggest that we should be graded as follows: -
 
 == References ==
 
+- Lecture notes
 - CS3245 Piazza forum (e.g. need to filter punctuation)
-- Query expansion
-    - https://stackoverflow.com/questions/27591621/nltk-convert-tokenized-sentence-to-synset-format
-    - https://stackoverflow.com/questions/59355529/is-there-any-order-in-wordnets-synsets
-    - https://www.nltk.org/howto/wordnet.html#similarityery
+- NLTK website, stackoverflow (for query expansion and similarity between synonyms)
+- Wikipedia (for variants of tf-idf/scoring system)
+- Wikipedia Okapi BM25
