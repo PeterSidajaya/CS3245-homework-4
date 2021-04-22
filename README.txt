@@ -45,12 +45,16 @@ on how they were categorized.
     such that x appears in posting_list_a, x+1 appears in posting_list_b, and x+2 appears in posting_list_c. 
     And if this is true we add the document to the result.
 
+Query expansion is applied on each clauses, both for the phrasal and free text clause. For phrasal queries, we still separate
+between (i) the results obtained through phrasal search on the original phrasal queries and (ii) the results obtained through search on the
+expanded phrasal queries. An example use case on this design decision can be found under `EXPANSION ON PHRASAL QUERY` section.
+
 After processing and intersecting all subqueries, we retrieve all unique words in the clauses and the query expansion
 of each clause, and perform a final free text search on this "query_list". e.g. if our original query was '"a b" AND c d e AND "f g"',
 we will perform the final free text search on query_list 'a b c d e f g' (plus query expansion).
 
     This final free_text_search will be done with a priority list. The priority list consists of all the documents that 
-    passed the original AND intersections, and they are tagged with whether they were also the result of a phrasal query.
+    passed the original AND intersections, and they are tagged with whether they were also the result of a phrasal query or free text query.
     We perform a similar tf-idf to our query_list first as in the regular free_text_search, but for scoring, we will add
     additional weight to those that were present in phrasal queries, and ensure that those in the priority
     list are given a score at least that of the average score in our query_list result. We finally sort by this weighted score.
@@ -62,21 +66,34 @@ but in our final submission we do not turn this on.
 
 Query Expansion:
     For our query, we expand the query by adding the top K synonyms of each word in our original query to the query.
-    We only perform query expansion for terms in free text queries, and not phrasal queries.
 
-    The logic is found in query_expansion.py
+    The logic of expansion is found in query_expansion.py
 
 Pseudo-Relevance Feedback (bonus):
     During indexing, we stored the 5 most common words (stop words removed) that occurred in each document in our dictionary.
+
     When we turn on PRF, we first perform our regular query processing pipeline once through. We then take 
-    the results, and we augment the original query vector by adding the 5 most common words from each of the top k (10) results,
-    and taking a weighted average of the original query vector with the centroid of the tf-idf values from the top k results
-    with the added words. We then perform the free text query pipeline with this new query vector.
+    the results, and we extract all 5 most common words (excluding stopwords) from the top k (20) results. For all of the commmon
+    words, we calculate the idf score for each word, and choose the words with highest idf scores.
+
+    Afterwards, we perform another query search (using the regular processing pipeline) with the original query augmented with
+    these words.
 
     In our final submission, this is DISABLED, because the most common words in the documents tend not to be related to the
     search query, and throw off the results.
     
     The logic is found in query_prf.py
+
+=== EXPANSION ON PHRASAL QUERY ===
+
+This design decision is derived from our observation on the given q1.txt from LumiNUS: with the query `quiet phone call` and
+one of the expected result of document id 6807771. From the document 6807771 itself, the document has multiple "telephone call" phrases
+instead of the `phone call`.
+
+This implies that if we perform a query search on `quiet AND "phone call"`, document 6807771 will not appear as a result. However, we deem
+that document 6807771 is still relevant as it contains many "telephone call" phrases, although will not ranked high as it does not exactly match
+the given phrasal query "phone call". This lead us to still apply query expansion on the phrasal query "phone call" to still include document
+6807771.
 
 == Files included with this submission ==
 
