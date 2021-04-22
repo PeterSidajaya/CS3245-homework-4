@@ -149,10 +149,10 @@ def merge_files(dictionary_file_1_add, posting_file_1_add, dictionary_file_2_add
     dictionary[DOCUMENT_LENGTH_KEYWORD] = length_dict
 
     # Combine the IMPT
-    title_dict1 = dictionary_1[IMPT_KEYWORD]
-    title_dict2 = dictionary_2[IMPT_KEYWORD]
-    title_dict = {**title_dict1, **title_dict2}             # merge two dictionaries
-    dictionary[IMPT_KEYWORD] = title_dict
+    impt_dict1 = dictionary_1[IMPT_KEYWORD]
+    impt_dict2 = dictionary_2[IMPT_KEYWORD]
+    impt_dict = {**impt_dict1, **impt_dict2}             # merge two dictionaries
+    dictionary[IMPT_KEYWORD] = impt_dict
 
     # Dump the dictionary
     pickle.dump(dictionary, dictionary_output)
