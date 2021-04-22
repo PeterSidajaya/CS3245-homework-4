@@ -11,21 +11,29 @@ class QueryType(Enum):
     PHRASAL = 1
 
 def categorise_query(query: str):
-    """Split a query into a list of clauses.
+    """Split a query into a list of of list clauses.
 
     A query can be thought of multiple subqueries connected by AND operators, and each
     subquery can consist of multiple clauses, which are either free text queries or phrasal queries.
     The clauses in a subquery are implicitly connected via OR operators.
     
-    Each element in the result is a subquery, which is a list of tuples, where each tuple
-    is a clause, its type, and the boolean operator to connect with the next element.
+    This method represents this structure in a list of list, where
+
+        [[subquery1_elements...], [subquery2_elements...]]
+
+        where the subquery elements are represented as a list of tuples which is a list of tuples,
+        and each tuple is a clause and its type (phrasal of free text).
 
     This method reads the query from left to right; stopping at every keywords ('"', AND)
     and determine that the substring in between as keywords as clauses.
 
-    e.g. Input: "little puppy" AND chihuahua
-         Output: [('little puppy', <QueryType.PHRASAL>), ('chihuahua', <QueryType.FREE_TEXT>)]
-
+    e.g. Input: "little puppy" dog AND chihuahua
+         Output: [
+                    [('little puppy', <QueryType.PHRASAL>), ('dog', <QueryType.FREE_TEXT>)],
+                    [('chihuahua', <QueryType.FREE_TEXT>)]
+                 ]
+         where results[0] is the elements representing subquery '"little puppy" dog'
+               results[1] is the elements representing subquery 'chihuahua'
     Args: 
         query(str): The raw query
     Returns:
@@ -180,7 +188,7 @@ def union_document_ids(doc_list1, doc_list2):
 
     return result
 
-def stem_clauses(query_clauses, stemmer, lemmtzr):
+def stem_clauses(query_clauses):
     """Stem each of the subqueries in query_clauses.
 
     query_clauses should be a list of subqueries created by categorize_query, where each subquery is

@@ -10,7 +10,7 @@ def invert(multiple_doc_list, dictionary_file_add, posting_file_add):
     """Invert a term stream to dictionary and posting files
 
     Args:
-        multiple_doc_list (<list<doc_id, title, token_list>>): list consisting of (doc_id, title, token_list) tuples
+        multiple_doc_list (<list<doc_id, token_list>>): list consisting of (doc_id, token_list) tuples
         dictionary_file_add (str): address of the dictionary file
         posting_file_add (str): address of the posting file
     """

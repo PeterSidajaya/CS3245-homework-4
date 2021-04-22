@@ -30,14 +30,11 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
         String containing the result, which is the sorted list of doc ID's corresponding 
         to the query.
     """
-    stemmer = PorterStemmer()
-    lemmatzr = WordNetLemmatizer()
-
     # Categorise query
     query_clauses = categorise_query(query_string)
 
     # Stem
-    stemmed_query_clauses = stem_clauses(query_clauses, stemmer, lemmatzr)
+    stemmed_query_clauses = stem_clauses(query_clauses)
 
     # If prf_clause is given, extend the last OR clause with the prf_clause.
     #
