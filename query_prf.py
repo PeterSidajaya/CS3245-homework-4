@@ -1,8 +1,7 @@
 from constants import *
 from collections import Counter
 from index_helper import get_word_list
-from query_util import stem_clauses, normalize_list, QueryType, tag_results
-# from scoring import get_results_for_vector
+from query_util import stem_clauses, normalize_list, QueryType, tag_results, get_avg_score
 from nltk import word_tokenize
 
 import time
@@ -38,8 +37,11 @@ def prf_impt_words(ranked_list, query, dictionary):
     impt_words_with_idf = list(map(lambda x: (x, get_term_idf(x, dictionary, no_of_documents)), impt_words))
     impt_words_with_idf.sort(key=lambda x: x[1])
 
-    # We just take the same number as the document taken
-    new_query_words = impt_words_with_idf[:PRF_NUM_OF_RESULTS]
+    flat_top_impt_words = impt_words_with_idf[:PRF_NUM_OF_RESULTS]
+    avg_idf_score_words = get_avg_score(flat_top_impt_words)
+
+    # Filter out weaker results
+    new_query_words = filter(lambda x: x[1] > avg_idf_score_words, flat_top_impt_words)
     new_query_words = map(lambda x: x[0], new_query_words)
 
     return new_query_words

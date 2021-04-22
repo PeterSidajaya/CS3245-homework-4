@@ -1,6 +1,6 @@
 from constants import *
 from index_helper import get_word_list
-from query_util import QueryType
+from query_util import QueryType, get_avg_score
 
 import math
 
@@ -99,24 +99,6 @@ def combine_score_and_tag(scored_list, tagged_list, default_score, default_tag):
 
     # Final output has the format of (doc_id, score, tag)
     return [(k, v[0], v[1]) for k, v in tagged_score_dict.items()]
-
-def get_avg_score(results_with_score):
-    """Get the average score of the results.
-    
-    This is used as a basis for the default score for documents in the priority list,
-    as well as a basis to find a filter threshold to remove results.
-
-    Args:
-        results_with_score (list(doc_id, score)): The list to compute an average on
-    """
-    score_sum = 0
-    for res in results_with_score:
-        score_sum += res[1]
-
-    if len(results_with_score) > 0:
-        return score_sum / len(results_with_score)
-    else:
-        return 0
 
 # def get_results_for_vector(query_term_vector, query_keys, dictionary, posting_file, tagged_prio_list, do_ranking):
 #     """Find the documents for the given query vector.

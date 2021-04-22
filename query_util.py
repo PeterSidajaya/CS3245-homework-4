@@ -284,3 +284,21 @@ def tag_results(results, tag):
         list(int, tag): The list of tagged results
     """
     return list(map(lambda x: (x, tag), results))
+
+def get_avg_score(results_with_score):
+    """Get the average score of the results.
+
+    This is used as a basis for the default score for documents in the priority list,
+    as well as a basis to find a filter threshold to remove results.
+
+    Args:
+        results_with_score (list(doc_id, score)): The list to compute an average on
+    """
+    score_sum = 0
+    for res in results_with_score:
+        score_sum += res[1]
+
+    if len(results_with_score) > 0:
+        return score_sum / len(results_with_score)
+    else:
+        return 0
