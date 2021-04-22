@@ -73,7 +73,7 @@ def process_query(query_string, dictionary, posting_file, use_prf=False, prf_cla
                 free_text_list = word_tokenize(clause_word)
                 expanded_words.extend(free_text_list)
 
-                curr_result  = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
+                curr_result = free_text_search(free_text_list, dictionary, posting_file, None, do_ranking=False)
                 curr_result = tag_results(curr_result, QueryType.FREE_TEXT)
 
             # Combine with the existing results
