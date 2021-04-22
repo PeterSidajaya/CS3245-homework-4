@@ -6,7 +6,7 @@ REMOVE_STOPWORDS = True
 # Query processing
 USE_STEMMER = True
 USE_LEMMATIZER = True
-USE_PRF = True
+USE_PRF = False
 
 # Result ranking
 PHRASAL_WEIGHT = 1.7    # the higher it is, the more weight phrasal results has
